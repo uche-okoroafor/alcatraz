@@ -1,0 +1,149 @@
+/* custom.css */
+body {
+	background-color: #2b3042; /* Light gray background */
+}
+
+.card-custom {
+	color: #555b70 !important; /* Dark gray text */
+}
+
+.blinking-dot {
+	width: 15px;
+	height: 15px;
+	background-color: #3fb923;
+	border-radius: 50%;
+	animation: blink 1s infinite;
+	position: absolute;
+	top: 20px;
+	right: 20px;
+}
+
+@keyframes blink {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.static-dot-pending,
+.blinking-dot-error,
+.static-dot-inactive,
+.blinking-dot-danger,
+.static-dot-active {
+	width: 15px;
+	height: 15px;
+	background-color: #2fa8f6;
+	border-radius: 50%;
+	position: absolute;
+	top: 20px;
+	right: 20px;
+}
+
+.blinking-dot-error {
+	background-color: rgb(228, 43, 43);
+	animation: blink 4s infinite;
+}
+
+.static-dot-inactive {
+	background-color: #ced10a;
+}
+
+.static-dot-active {
+	background-color: #3fb923;
+}
+
+.blinking-dot-danger {
+	background-color: #ff0000;
+	animation: blink 0.7s infinite;
+}
+.logo .blinking-dot-danger,
+.logo .static-dot-active {
+	left: 105%;
+	top: 35%;
+}
+
+.strategy-card {
+	background-color: #ffffff;
+	border: 1px solid #ffffff;
+	position: relative;
+	cursor: pointer;
+	box-shadow: 0 4px 8px rgb(255, 255, 255);
+	transition: box-shadow 0.3s ease;
+}
+
+.strategy-card:hover {
+	box-shadow: 0 8px 16px rgba(160, 157, 157, 0.692);
+}
+
+.progress {
+	position: relative;
+	height: 10px;
+	background-color: #e0e0e0;
+	border-radius: 10px;
+	overflow: hidden;
+	transition: opacity 1s ease-in-out;
+}
+
+.progress-bar {
+	position: absolute;
+	height: 100%;
+	background-color: #3fb923;
+	animation: moveProgressBar 2s linear infinite;
+}
+
+@keyframes moveProgressBar {
+	0% {
+		left: -100%;
+	}
+	100% {
+		left: 100%;
+	}
+}
+
+.progress-hidden {
+	opacity: 0;
+}
+
+/* SignalsTable.css */
+.rotating-icon {
+	animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.bell {
+	animation: shake 2s infinite;
+	font-size: 30px;
+  color: #3fb923;
+}
+
+@keyframes shake {
+	5% {
+		transform: rotate(10deg);
+	}
+
+	10% {
+		transform: rotate(-10deg);
+	}
+
+	15% {
+		transform: rotate(10deg);
+	}
+
+	20% {
+		transform: rotate(0deg);
+	}
+}
+
