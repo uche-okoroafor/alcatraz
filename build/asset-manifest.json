@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/alcatraz/static/css/main.d587a9ce.css",
-    "main.js": "/alcatraz/static/js/main.e04e6662.js",
-    "static/js/453.4447c142.chunk.js": "/alcatraz/static/js/453.4447c142.chunk.js",
-    "static/media/Trading-Strategies-logo.png": "/alcatraz/static/media/Trading-Strategies-logo.ca06770fe6d366dcb2fe.png",
-    "static/media/Trading-Strategies-logo-white.png": "/alcatraz/static/media/Trading-Strategies-logo-white.f00d0e85618d5427a0ea.png",
-    "index.html": "/alcatraz/index.html",
-    "main.d587a9ce.css.map": "/alcatraz/static/css/main.d587a9ce.css.map",
-    "main.e04e6662.js.map": "/alcatraz/static/js/main.e04e6662.js.map",
-    "453.4447c142.chunk.js.map": "/alcatraz/static/js/453.4447c142.chunk.js.map"
+    "main.css": "./static/css/main.d587a9ce.css",
+    "main.js": "./static/js/main.d160e30e.js",
+    "static/js/453.4447c142.chunk.js": "./static/js/453.4447c142.chunk.js",
+    "static/media/Trading-Strategies-logo.png": "./static/media/Trading-Strategies-logo.ca06770fe6d366dcb2fe.png",
+    "static/media/Trading-Strategies-logo-white.png": "./static/media/Trading-Strategies-logo-white.f00d0e85618d5427a0ea.png",
+    "index.html": "./index.html",
+    "main.d587a9ce.css.map": "./static/css/main.d587a9ce.css.map",
+    "main.d160e30e.js.map": "./static/js/main.d160e30e.js.map",
+    "453.4447c142.chunk.js.map": "./static/js/453.4447c142.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d587a9ce.css",
-    "static/js/main.e04e6662.js"
+    "static/js/main.d160e30e.js"
   ]
 }
