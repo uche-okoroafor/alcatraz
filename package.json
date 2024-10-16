@@ -2,7 +2,7 @@
   "name": "alcatraz",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://uche-okoroafor.github.io/alcatraz",
+  "homepage": ".",
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
