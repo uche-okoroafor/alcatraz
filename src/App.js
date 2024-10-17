@@ -139,7 +139,7 @@ export default function TradingDashboard() {
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
               <img src={logos} className='mr-3' alt="Trading Strategies" style={{ width: '50px', height: 'auto', borderRadius: '50%', marginRight: '10px' }} />
               <Typography variant="h6" component="h6" style={{ color: 'white' }}>
-                Trading Strategies
+                Alcatraz
               </Typography>
               <div className={hasError()}></div>
             </div>
@@ -148,6 +148,28 @@ export default function TradingDashboard() {
               Add Strategy Setup
             </Button>
           </div>
+
+          {loading && (
+            <div className="d-flex justify-content-center align-items-center"
+              style={{
+                position: 'fixed',
+                top: '40%',
+                left: 0,
+                right: 0,
+                zIndex: 9999,
+              }}
+            >
+              <div className="spinner-border" role="status"
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  color: '#2fa8f6'
+                }}
+              >
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          )}
 
           <StrategySetupCard
             handleCardClick={handleCardClick}
@@ -158,6 +180,7 @@ export default function TradingDashboard() {
             setActiveRunningStrategy={setActiveRunningStrategy}
             newSignals={newSignals}
           />
+
           <StrategySetupForm
             open={open}
             onClose={() => setOpen(false)}
