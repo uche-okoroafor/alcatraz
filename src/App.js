@@ -12,7 +12,10 @@ import io from "socket.io-client";
 import axios from 'axios'; // Import axios for making HTTP requests
 import { SERVER_URL, SOCKET_IO_URL } from './endpoints';
 
-const socket = io(SOCKET_IO_URL); // Adjust the URL as needed
+const socket = io(SOCKET_IO_URL,{
+    transports: ['websocket', 'polling'],
+    withCredentials: true,
+  }); 
 
 export default function TradingDashboard() {
 
