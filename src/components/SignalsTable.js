@@ -82,7 +82,9 @@ const SignalsTable = ({ selectedSetup }) => {
                   <TableCell>{signal.stop_loss}</TableCell>
                   <TableCell>{signal.signal}</TableCell>
                   <TableCell>{getStatusIcon(signal.status)}</TableCell>
-                  <TableCell>{moment(signal?.created_at).format('DD/MM/YYYY hh:mm:ss:A')}</TableCell>
+                  <TableCell>
+                    {moment(signal?.created_at).format('MMMM Do YYYY, h:mm:ss A')}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

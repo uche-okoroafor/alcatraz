@@ -67,7 +67,8 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                         <strong>Run Count:</strong> {focusedSetup?.run_count}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Last Run Time:</strong> {moment(focusedSetup?.last_active).format('DD/MM/YYYY hh:mm:ss:A')}
+                        <strong>Last Run Time:</strong>
+                        {' '} {moment(focusedSetup?.last_active).format('MMMM Do YYYY, h:mm:ss A')}
                     </Typography>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
