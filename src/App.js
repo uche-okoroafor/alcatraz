@@ -4,7 +4,6 @@ import { Add } from '@mui/icons-material';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StrategySetupCard from './components/StrategySetupCard';
 import StrategySetupForm from './components/StrategySetupForm';
-import logo from './Trading-Strategies-logo.png';
 import logos from './Trading-Strategies-logo-white.png';
 import './App.css'; // Import the CSS file
 import SelectedSetupDetails from './components/StrategySetupDatils';
@@ -148,7 +147,7 @@ export default function TradingDashboard() {
             </div>
 
             <Button variant="contained" startIcon={<Add />} onClick={() => setOpen(true)} style={{ backgroundColor: '#2fa8f6' }}>
-              Add Strategy Setup
+              Add Setup
             </Button>
           </div>
 
@@ -193,7 +192,7 @@ export default function TradingDashboard() {
         </>
       ) : (
         <div>
-          <Button variant="contained" onClick={handleBackClick} className="mb-4" style={{ backgroundColor: '#2fa8f6' }}>Back to Trading Strategies</Button>
+          <Button variant="contained" onClick={handleBackClick} className="mb-4" style={{ backgroundColor: '#2fa8f6' }}>Back to Setup</Button>
           <SelectedSetupDetails
             selectedSetup={selectedSetup}
             onUpdate={setNewAddedSetup}

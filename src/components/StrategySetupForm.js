@@ -108,7 +108,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>{initialSetup ? 'Edit Strategy Setup' : 'Add New Strategy Setup'}</DialogTitle>
+            <DialogTitle>{initialSetup ? 'Edit Strategy Setup' : 'Add New Setup'}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
