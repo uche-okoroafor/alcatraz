@@ -142,14 +142,16 @@ const StrategySetupCard = (props) => {
                 ))}
             </div>
 
-            <div className="d-flex justify-content-between mt-4">
-                <Button variant="contained" onClick={handlePreviousPage} disabled={currentPage === 1} style={{ backgroundColor: '#3FB923' }}>
-                    Previous
-                </Button>
-                <Button variant="contained" onClick={handleNextPage} disabled={currentPage * pageSize >= totalSetups} style={{ backgroundColor: '#3FB923' }}>
-                    Next
-                </Button>
-            </div>
+            {!(currentPage === 1 && (currentPage * pageSize >= totalSetups)) &&
+                <div className="d-flex justify-content-between mt-4">
+                    <Button variant="contained" onClick={handlePreviousPage} disabled={currentPage === 1} style={{ backgroundColor: '#3FB923' }}>
+                        Previous
+                    </Button>
+                    <Button variant="contained" onClick={handleNextPage} disabled={currentPage * pageSize >= totalSetups} style={{ backgroundColor: '#3FB923' }}>
+                        Next
+                    </Button>
+                </div>
+            }
         </>
     );
 };
