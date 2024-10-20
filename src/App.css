@@ -34,7 +34,8 @@ body {
 .blinking-dot-error,
 .static-dot-inactive,
 .blinking-dot-danger,
-.static-dot-active {
+.static-dot-active,
+.static-dot-inactive-market {
 	width: 15px;
 	height: 15px;
 	background-color: #2fa8f6;
@@ -49,7 +50,8 @@ body {
 	animation: blink 4s infinite;
 }
 
-.static-dot-inactive {
+.static-dot-inactive,
+.static-dot-inactive-market {
 	background-color: #ced10a;
 }
 
@@ -62,7 +64,7 @@ body {
 	animation: blink 0.7s infinite;
 }
 .logo .blinking-dot-danger,
-.logo .static-dot-active {
+.logo .static-dot-active, .static-dot-inactive-market {
 	left: 105%;
 	top: 35%;
 }
@@ -126,7 +128,7 @@ body {
 .bell {
 	animation: shake 2s infinite;
 	font-size: 30px;
-  color: #3fb923;
+	color: #3fb923;
 }
 
 @keyframes shake {
@@ -146,4 +148,3 @@ body {
 		transform: rotate(0deg);
 	}
 }
-

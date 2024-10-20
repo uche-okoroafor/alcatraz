@@ -11,10 +11,10 @@ import io from "socket.io-client";
 import axios from 'axios'; // Import axios for making HTTP requests
 import { SERVER_URL, SOCKET_IO_URL } from './endpoints';
 
-const socket = io(SOCKET_IO_URL,{
-    transports: ['websocket', 'polling'],
-    withCredentials: true,
-  }); 
+const socket = io(SOCKET_IO_URL, {
+  transports: ['websocket', 'polling'],
+  withCredentials: true,
+});
 
 export default function TradingDashboard() {
 
@@ -27,10 +27,12 @@ export default function TradingDashboard() {
   const [newAddedSetup, setNewAddedSetup] = useState(false);
   const [newSignals, setNewSignals] = useState({});
   const [serverError, setServerError] = useState(false);
+  const [marketDownTime, setMarketDownTime] = useState(false);
 
   useEffect(() => {
     // Listen for new signals
-    socket.on("Running-Strategy", (runningStrategyObj) => {
+    socket.on("running-strategy", (runningStrategyObj) => {
+      console.log('running-strategy')
       setRunningStrategy((prevRunningStrategy) => {
         const tempArr = [...prevRunningStrategy, runningStrategyObj._id];
         return tempArr;
@@ -47,7 +49,7 @@ export default function TradingDashboard() {
 
     // Clean up the effect
     return () => {
-      socket.off("Running-Strategy");
+      socket.off("running-strategy");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -55,6 +57,7 @@ export default function TradingDashboard() {
   useEffect(() => {
     // Listen for new signals
     socket.on("error-alert", (errorData) => {
+      console.log(errorData,'error-alert')
       const tempObj = activeRunningStrategy;
       tempObj.errors[errorData.setupId] = errorData;
       setActiveRunningStrategy(tempObj);
@@ -69,17 +72,33 @@ export default function TradingDashboard() {
 
   useEffect(() => {
     // Listen for new signals
-    socket.on("signal-alert", (data) => {
+    socket.on("new-signal-alert", (data) => {
+      console.log('new-signal-alert')
       const tempObj = newSignals;
-      tempObj[data.setup_id] = data;
+      tempObj[data.setupId] = data;
       setNewSignals(tempObj);
     });
 
     // Clean up the effect
     return () => {
-      socket.off("signal-alert");
+      socket.off("new-signal-alert");
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Listen for new signals
+    socket.on("market-down-time", (data) => {
+      console.log(data, 'market-down-time')
+      setMarketDownTime(data.is_market_down);
+    });
+
+    // Clean up the effect
+    return () => {
+      socket.off("market-down-time");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // Function to check the server
@@ -129,6 +148,8 @@ export default function TradingDashboard() {
   const hasError = () => {
     if (Object.keys(activeRunningStrategy.errors).length > 0 || serverError) {
       return 'blinking-dot-danger';
+    } else if (marketDownTime) {
+      return 'static-dot-inactive-market';
     }
     return 'static-dot-active';
   };

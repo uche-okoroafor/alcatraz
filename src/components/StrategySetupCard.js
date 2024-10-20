@@ -37,19 +37,18 @@ const StrategySetupCard = (props) => {
 
         const handleCheck = (element) => {
             const timeoutInSeconds = calculateTimeout(element.time_interval);
+            const isWithInTime = new Date(element.last_active).getTime() + timeoutInSeconds * 1000 > new Date().getTime();
 
             if (!activeRunningStrategy[element._id]) {
                 tempObj[element._id] = {
                     _id: element._id,
                     time_interval: element.time_interval,
                     last_active: new Date(),
-                    isRunning: undefined,
+                    isRunning: isWithInTime || undefined,
                     failedRunCount: 1
                 }
             } else if (activeRunningStrategy[element._id]?.failedRunCount === 1) {
                 tempObj[element._id].failedRunCount = 2;
-            } else if (activeRunningStrategy[element._id]?.failedRunCount === 2) {
-                tempObj[element._id].failedRunCount = 3;
                 tempObj[element._id].isRunning = false;
             }
 
