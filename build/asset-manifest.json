@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "./static/css/main.d587a9ce.css",
-    "main.js": "./static/js/main.5bbccfbc.js",
+    "main.css": "./static/css/main.fabfa791.css",
+    "main.js": "./static/js/main.71e13ca2.js",
     "static/js/453.4447c142.chunk.js": "./static/js/453.4447c142.chunk.js",
     "static/media/Trading-Strategies-logo-white.png": "./static/media/Trading-Strategies-logo-white.f00d0e85618d5427a0ea.png",
     "index.html": "./index.html",
-    "main.d587a9ce.css.map": "./static/css/main.d587a9ce.css.map",
-    "main.5bbccfbc.js.map": "./static/js/main.5bbccfbc.js.map",
+    "main.fabfa791.css.map": "./static/css/main.fabfa791.css.map",
+    "main.71e13ca2.js.map": "./static/js/main.71e13ca2.js.map",
     "453.4447c142.chunk.js.map": "./static/js/453.4447c142.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.d587a9ce.css",
-    "static/js/main.5bbccfbc.js"
+    "static/css/main.fabfa791.css",
+    "static/js/main.71e13ca2.js"
   ]
 }

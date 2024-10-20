@@ -7,12 +7,14 @@ import setupApi from '../api/setupApi';
 
 // Sample data for dropdowns
 const STRATEGIES = [
-    { label: 'Peak Drop', value: 'peakDrop' },
+    { label: 'Peak Drop', value: 'PeakDrop' },
     { label: 'Summit Full', value: 'SummitFull' },
+    { label: 'Tori Trend Line CL', value: 'ToriTrendLineCL' },
+    { label: 'Tori Trend Line GTP', value: 'ToriTrendLineGTP' },
 ];
-const TARGET_ASSETS = ['BTC', 'ETH', 'XRP', 'ADA', 'DOGE', 'XAUUSD'];
+const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', 'TSLA', 'BTC', 'ETH', 'LTC', 'XRP', 'DOGE'];
 const AGAINST_ASSETS = ['USDT', 'USD', 'EUR', 'GBP'];
-const TIMEFRAMES = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
+const TIMEFRAMES = ['1m', '2m', '3m', '4m', '5m', '15m', '30m', '1h', '4h', '1d'];
 
 const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSetup, setInitialSetup }) => {
     const [newSetup, setNewSetup] = useState({
