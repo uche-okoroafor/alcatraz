@@ -4,7 +4,7 @@ import { Add } from '@mui/icons-material';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StrategySetupCard from './components/StrategySetupCard';
 import StrategySetupForm from './components/StrategySetupForm';
-import logos from './Trading-Strategies-logo-white.png';
+import logos from './asset/images/logo.png';
 import './App.css'; // Import the CSS file
 import SelectedSetupDetails from './components/StrategySetupDatils';
 import io from "socket.io-client";
