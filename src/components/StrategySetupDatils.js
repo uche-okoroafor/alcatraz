@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment/moment';
 import { Card, CardContent, Typography, Button, CardHeader } from '@mui/material';
 import SignalsTable from './SignalsTable';
 import StrategySetupForm from './StrategySetupForm';
-import moment from 'moment/moment';
+import setupApi from '../api/setupApi';
 
 const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, activeRunningStrategy }) => {
     const [open, setOpen] = useState(false);
     const [initialSetup, setInitialSetup] = useState(null);
     const [focusedSetup, setFocusedSetup] = useState(null);
+    const [previousSelectedSetup, setPreviousSelectedSetup] = useState(null);
 
     useEffect(() => {
-        setFocusedSetup(selectedSetup);
-    }, [selectedSetup]);
+        async function fetchData() {
+            const setupId = selectedSetup?._id;
+            if (setupId) {
+                const { data } = await setupApi.getDetails(setupId);
+                setFocusedSetup(data);
+                setPreviousSelectedSetup(selectedSetup);
+            }
+        }
+
+        if (selectedSetup?._id !== previousSelectedSetup?._id) {
+            fetchData();
+            setFocusedSetup(selectedSetup);
+        }
+    }, [previousSelectedSetup?._id, selectedSetup]);
 
     const handleEditClick = () => {
         setInitialSetup(focusedSetup);
@@ -58,7 +72,10 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                         <strong>Strategy:</strong> {focusedSetup?.strategy_type}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Pair:</strong> {focusedSetup?.target_asset}/{focusedSetup?.quote_asset}
+                        <strong>Asset</strong> {focusedSetup?.target_asset}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        <strong>Current Price</strong> {focusedSetup?.current_price}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         <strong>Timeframe:</strong> {focusedSetup?.time_interval}

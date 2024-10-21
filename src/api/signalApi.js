@@ -6,31 +6,37 @@ const API_BASE_URL = SERVER_URL;
 const signalApi = {
   add: async (newSetup) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/setup-strategy`, newSetup);
+      const response = await axios.post(`${API_BASE_URL}/signals`, newSetup);
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
-      throw error;
     }
   },
 
-  update: async (updatedSetup) => {
+  update: async (signalId, payload) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/setup-strategy/${updatedSetup.id}`, updatedSetup);
+      const response = await axios.patch(`${API_BASE_URL}/signals/${signalId}`, payload);
       return response.data;
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-      throw error;
+      console.error(`Error updating signal with ID ${signalId}:`, error.response ? error.response.data : error.message);
     }
   },
 
   delete: async (id) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/setup-strategy/${id}`);
+      const response = await axios.delete(`${API_BASE_URL}/signals/${id}`);
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
-      throw error;
+    }
+  },
+
+  getList: async ( page = 1, limit = 10) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/signals?page=${page}&limit=${limit}&sort=is_read^:asc`);
+      return response.data;
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
     }
   },
 
@@ -40,7 +46,6 @@ const signalApi = {
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
-      throw error;
     }
   }
 

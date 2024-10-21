@@ -12,7 +12,7 @@ const STRATEGIES = [
     { label: 'Tori Trend Line CL', value: 'ToriTrendLineCL' },
     { label: 'Tori Trend Line GTP', value: 'ToriTrendLineGTP' },
 ];
-const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', 'TSLA', 'BTC', 'ETH', 'LTC', 'XRP', 'DOGE'];
+const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', '^SPX', 'TSLA', 'PL=F', 'ETH', 'LTC', 'XRP', 'DOGE'];
 const AGAINST_ASSETS = ['USDT', 'USD', 'EUR', 'GBP'];
 const TIMEFRAMES = ['1m', '2m', '3m', '4m', '5m', '15m', '30m', '1h', '4h', '1d'];
 

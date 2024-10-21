@@ -30,6 +30,23 @@ const SignalsTable = ({ selectedSetup }) => {
     }
   }, [selectedSetup, currentPage]);
 
+
+  useEffect(() => {
+    const updateReadSignals = async () => {
+      try {
+        await Promise.all(
+          signals.map(signal => signalApi.update(signal._id, { is_read: true }))
+        );
+      } catch (error) {
+        console.error('Error updating signals:', error);
+      } 
+    };
+
+    if (signals && signals.length > 0) {
+      updateReadSignals();
+    }
+  }, [signals, currentPage]);
+
   const handleNextPage = () => {
     if (currentPage * pageSize < totalSignals) {
       setCurrentPage(currentPage + 1);

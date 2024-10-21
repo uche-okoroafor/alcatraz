@@ -31,9 +31,9 @@ const setupApi = {
     }
   },
 
-  get: async () => {
+  getDetails: async (setupId) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/strategy-setups`);
+      const response = await axios.get(`${API_BASE_URL}/strategy-setups/${setupId}`);
       return response.data;
     } catch (error) {
       console.log('There was a problem with the fetch operation:', error);

@@ -29,7 +29,8 @@ const StrategySetupCard = (props) => {
         };
 
         fetchSetups(currentPage);
-    }, [currentPage, setLoading, newAddedSetup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage, newAddedSetup]);
 
 
     const updateRunningStrategies = () => {

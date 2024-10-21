@@ -10,6 +10,7 @@ import SelectedSetupDetails from './components/StrategySetupDatils';
 import io from "socket.io-client";
 import axios from 'axios'; // Import axios for making HTTP requests
 import { SERVER_URL, SOCKET_IO_URL } from './endpoints';
+import Notification from './components/Notification'; // Import the new component
 
 const socket = io(SOCKET_IO_URL, {
   transports: ['websocket', 'polling'],
@@ -28,6 +29,7 @@ export default function TradingDashboard() {
   const [newSignals, setNewSignals] = useState({});
   const [serverError, setServerError] = useState(false);
   const [marketDownTime, setMarketDownTime] = useState(false);
+  const [signalAlert, setSignalAlert] = useState([]); // State for unread signals
 
   useEffect(() => {
     // Listen for new signals
@@ -57,7 +59,7 @@ export default function TradingDashboard() {
   useEffect(() => {
     // Listen for new signals
     socket.on("error-alert", (errorData) => {
-      console.log(errorData,'error-alert')
+      console.log(errorData, 'error-alert')
       const tempObj = activeRunningStrategy;
       tempObj.errors[errorData.setupId] = errorData;
       setActiveRunningStrategy(tempObj);
@@ -72,16 +74,17 @@ export default function TradingDashboard() {
 
   useEffect(() => {
     // Listen for new signals
-    socket.on("new-signal-alert", (data) => {
-      console.log('new-signal-alert')
+    socket.on("signal-alert", (data) => {
+      console.log('signal-alert')
       const tempObj = newSignals;
       tempObj[data.setupId] = data;
       setNewSignals(tempObj);
+      setSignalAlert(data); // Add to unread signals
     });
 
     // Clean up the effect
     return () => {
-      socket.off("new-signal-alert");
+      socket.off("signal-alert");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -167,9 +170,21 @@ export default function TradingDashboard() {
               <div className={hasError()}></div>
             </div>
 
-            <Button variant="contained" startIcon={<Add />} onClick={() => setOpen(true)} style={{ backgroundColor: '#2fa8f6' }}>
-              Add Setup
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Notification
+                signalAlert={signalAlert}
+                handleCardClick={handleCardClick}
+              />
+              <Button
+                variant="contained"
+                sx={{ marginLeft: '20px' }}
+                startIcon={<Add />}
+                onClick={() => setOpen(true)}
+                style={{ backgroundColor: '#2fa8f6' }}
+              >
+                Add Setup
+              </Button>
+            </div>
           </div>
 
           {loading && (
