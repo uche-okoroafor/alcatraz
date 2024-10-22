@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import StrategySetupCard from './components/StrategySetupCard';
+import StrategySetupCards from './components/StrategySetupCards';
 import StrategySetupForm from './components/StrategySetupForm';
 import logos from './asset/images/logo.png';
 import './App.css'; // Import the CSS file
@@ -158,10 +158,11 @@ export default function TradingDashboard() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container py-3">
       {currentView === 'list' ? (
         <>
-          <div className="mb-6 d-flex justify-content-between align-items-center logo">
+          <div className='patch1'></div>
+          <div className="sticky-header">
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
               <img src={logos} className='mr-3' alt="Trading Strategies" style={{ width: '50px', height: 'auto', borderRadius: '50%', marginRight: '10px' }} />
               <Typography variant="h6" component="h6" style={{ color: 'white' }}>
@@ -209,7 +210,7 @@ export default function TradingDashboard() {
             </div>
           )}
 
-          <StrategySetupCard
+          <StrategySetupCards
             handleCardClick={handleCardClick}
             setLoading={setLoading}
             runningStrategy={runningStrategy}

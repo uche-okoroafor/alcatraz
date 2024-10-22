@@ -63,8 +63,9 @@ body {
 	background-color: #ff0000;
 	animation: blink 0.7s infinite;
 }
-.logo .blinking-dot-danger,
-.logo .static-dot-active, .static-dot-inactive-market {
+.sticky-header .blinking-dot-danger,
+.sticky-header .static-dot-active, 
+.static-dot-inactive-market {
 	left: 105%;
 	top: 35%;
 }
@@ -148,3 +149,26 @@ body {
 		transform: rotate(0deg);
 	}
 }
+
+.sticky-header {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	padding: 10px 0;
+	width: 100%;
+	background-color: #2b3042;
+	margin: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+  }
+  
+  .patch1 {
+	height: 70px;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left:0;
+	z-index: 1;
+	background-color: #2b3042;
+  }

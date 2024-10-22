@@ -59,7 +59,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
     }, [initialSetup]);
 
     const handleAddSetup = async () => {
-        if (!newSetup.name || !newSetup.strategy_type || !newSetup.target_asset || !newSetup.quote_asset || !newSetup.time_interval) {
+        if (!newSetup.name || !newSetup.strategy_type || !newSetup.target_asset || !newSetup.time_interval) {
             alert('Please fill in all fields');
             return;
         }
@@ -158,6 +158,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                             name="quote_asset"
                             value={newSetup.quote_asset}
                             onChange={(e) => handleChange(e)}
+                            disabled
                         >
                             {AGAINST_ASSETS.map(asset => (
                                 <MenuItem key={asset} value={asset}>{asset}</MenuItem>

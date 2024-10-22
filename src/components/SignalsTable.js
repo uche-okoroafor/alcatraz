@@ -35,11 +35,11 @@ const SignalsTable = ({ selectedSetup }) => {
     const updateReadSignals = async () => {
       try {
         await Promise.all(
-          signals.map(signal => signalApi.update(signal._id, { is_read: true }))
+          signals.map(signal => !signal.is_read && signalApi.update(signal._id, { is_read: true }))
         );
       } catch (error) {
         console.error('Error updating signals:', error);
-      } 
+      }
     };
 
     if (signals && signals.length > 0) {

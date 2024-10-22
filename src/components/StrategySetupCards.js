@@ -1,37 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent, Typography, Button } from '@mui/material';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Card, CardHeader, CardContent, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import setupApi from '../api/setupApi';
 import { calculateTimeout } from '../helpers';
 
-
-const StrategySetupCard = (props) => {
+const StrategySetupCards = (props) => {
     const { setLoading, handleCardClick, runningStrategy, newAddedSetup, activeRunningStrategy, setActiveRunningStrategy, newSignals } = props;
     const [setups, setSetups] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalSetups, setTotalSetups] = useState(0);
     const [isActiveRunningStrategyUpdated, setIsActiveRunningStrategyUpdated] = useState(false);
     const pageSize = 9;
+    const observer = useRef();
+    const setupIds = useRef(new Set());
 
+    const fetchSetups = useCallback(async (page) => {
+        setLoading(true);
+        try {
+            const data = await setupApi.fetchSetups(page, pageSize);
+            const newSetups = data.data.filter(setup => !setupIds.current.has(setup._id));
+            newSetups.forEach(setup => setupIds.current.add(setup._id));
+            setSetups(prevSetups => [...prevSetups, ...newSetups]);
+            setTotalSetups(data.navigation.total);
+        } catch (error) {
+            console.error('Error fetching setups:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading]);
 
     useEffect(() => {
-        const fetchSetups = async (page) => {
-            setLoading(true);
-            try {
-                const data = await setupApi.fetchSetups(page, pageSize);
-                setSetups(data.data);
-                setTotalSetups(data.navigation.total);
-            } catch (error) {
-                console.error('Error fetching setups:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchSetups(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, newAddedSetup]);
-
+    }, [currentPage, newAddedSetup, fetchSetups]);
 
     const updateRunningStrategies = () => {
         const tempObj = activeRunningStrategy;
@@ -68,20 +68,18 @@ const StrategySetupCard = (props) => {
         if (!isActiveRunningStrategyUpdated && setups.length > 0) {
             updateRunningStrategies()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setups]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setups, isActiveRunningStrategyUpdated]);
 
-    const handleNextPage = () => {
-        if (currentPage * pageSize < totalSetups) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
+    const lastSetupElementRef = useCallback(node => {
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && setups.length < totalSetups) {
+                setCurrentPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [setups.length, totalSetups]);
 
     const getStatusIcon = (setup) => {
         if (!setup.is_active) {
@@ -105,9 +103,13 @@ const StrategySetupCard = (props) => {
 
     return (
         <>
-            <div className="row mt-5 card-custom" style={{ minHeight: '50vh' }}>
-                {setups.map(setup => (
-                    <div className="col-12 col-md-6 col-lg-4 mb-4" key={setup._id}>
+            <div className="row mt-4 card-custom" style={{ minHeight: '50vh' }}>
+                {setups.map((setup, index) => (
+                    <div
+                        className="col-12 col-md-6 col-lg-4 mb-4"
+                        key={setup._id}
+                        ref={index === setups.length - 1 ? lastSetupElementRef : null}
+                    >
                         <Card className="strategy-card" onClick={() => handleCardClick(setup)}>
                             <CardHeader
                                 title={setup.name}
@@ -122,7 +124,6 @@ const StrategySetupCard = (props) => {
                                     </div>
                                     {newSignals[setup._id] && <NotificationsIcon className='bell mt-4' />}
                                 </div>
-
 
                                 {runningStrategy.includes(setup._id) && (
                                     <div className={`progress ${runningStrategy.includes(setup._id) ? '' : 'progress-hidden'}`}>
@@ -141,19 +142,8 @@ const StrategySetupCard = (props) => {
                     </div>
                 ))}
             </div>
-
-            {!(currentPage === 1 && (currentPage * pageSize >= totalSetups)) &&
-                <div className="d-flex justify-content-between mt-4">
-                    <Button variant="contained" onClick={handlePreviousPage} disabled={currentPage === 1} style={{ backgroundColor: '#3FB923' }}>
-                        Previous
-                    </Button>
-                    <Button variant="contained" onClick={handleNextPage} disabled={currentPage * pageSize >= totalSetups} style={{ backgroundColor: '#3FB923' }}>
-                        Next
-                    </Button>
-                </div>
-            }
         </>
     );
 };
 
-export default StrategySetupCard;
+export default StrategySetupCards;
