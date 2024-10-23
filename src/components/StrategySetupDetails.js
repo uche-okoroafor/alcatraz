@@ -40,7 +40,7 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
         if (!setup?.is_active) {
             return 'static-dot-inactive'
         } else if (setup?.is_active && activeRunningStrategy[setup._id]?.isRunning) {
-            return "blinking-dot"
+            return "styles_dot__p5bay styles_online__X4EkV"
         } else if (setup?.is_active && activeRunningStrategy[setup._id]?.isRunning === undefined) {
             return 'static-dot-pending'
         } else if (setup?.is_active && !activeRunningStrategy[setup._id]?.isRunning) {
@@ -58,13 +58,18 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
 
     return (
         <div>
-            <Card sx={{ position: 'relative' }}>
+            <Card className="strategy-details" sx={{ position: 'relative' }}>
                 <CardHeader
                     title={focusedSetup?.name}
-                    action={<div className={runError() || getStatusIcon(focusedSetup)}></div>}
+                    className='card-header'
+                    action={
+                        <div className={runError() || getStatusIcon(focusedSetup)}>
+                            <span><span></span></span>
+                        </div>
+                    }
                     sx={{ paddingBottom: '0px' }}
                 />
-                <CardContent>
+                <CardContent className='card-content'>
                     <Typography variant="body2" color="text.secondary">
                         <strong>Id:</strong> {focusedSetup?._id}
                     </Typography>

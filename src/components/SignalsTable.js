@@ -75,12 +75,14 @@ const SignalsTable = ({ selectedSetup }) => {
   const totalPages = Math.ceil(totalSignals / pageSize);
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      className='table-container'
+      component={Paper}>
       {loading ? (
         <CircularProgress />
       ) : (
         <>
-          <Table>
+          <Table >
             <TableHead>
               <TableRow>
                 <TableCell>Signal Price</TableCell>
@@ -91,7 +93,7 @@ const SignalsTable = ({ selectedSetup }) => {
                 <TableCell>Created At</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody >
               {signals.map((signal) => (
                 <TableRow key={signal._id}>
                   <TableCell>{signal.signal_price}</TableCell>

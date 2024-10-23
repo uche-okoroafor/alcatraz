@@ -68,7 +68,7 @@ const StrategySetupCards = (props) => {
         if (!isActiveRunningStrategyUpdated && setups.length > 0) {
             updateRunningStrategies()
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setups, isActiveRunningStrategyUpdated]);
 
     const lastSetupElementRef = useCallback(node => {
@@ -85,7 +85,7 @@ const StrategySetupCards = (props) => {
         if (!setup.is_active) {
             return 'static-dot-inactive'
         } else if (setup.is_active && activeRunningStrategy[setup._id]?.isRunning) {
-            return "blinking-dot"
+            return "styles_dot__p5bay styles_online__X4EkV"
         } else if (setup.is_active && activeRunningStrategy[setup._id]?.isRunning === undefined) {
             return 'static-dot-pending'
         } else if (setup.is_active && !activeRunningStrategy[setup._id]?.isRunning) {
@@ -112,17 +112,22 @@ const StrategySetupCards = (props) => {
                     >
                         <Card className="strategy-card" onClick={() => handleCardClick(setup)}>
                             <CardHeader
+                                className='card-header'
                                 title={setup.name}
-                                action={<div className={runError(setup) || getStatusIcon(setup)}></div>}
+                                action={
+                                    <div className={runError(setup) || getStatusIcon(setup)}>
+                                        <span><span></span></span>
+                                    </div>
+                                }
                             />
                             <CardContent sx={{ position: 'relative' }}>
                                 <div className='d-flex justify-content-between'>
                                     <div >
                                         <Typography><strong>Strategy:</strong> {setup.strategy_type}</Typography>
-                                        <Typography><strong>Pair:</strong> {setup.target_asset}/{setup.quote_asset}</Typography>
-                                        <Typography><strong>Timeframe:</strong> {setup.time_interval}</Typography>
+                                        <Typography><strong>Asset:</strong> {setup.target_asset}</Typography>
+                                        <Typography><strong>Time Interval:</strong> {setup.time_interval}</Typography>
                                     </div>
-                                    {newSignals[setup._id] && <NotificationsIcon className='bell mt-4' />}
+                                    {newSignals.includes(setup._id) && <NotificationsIcon className='bell mt-4' />}
                                 </div>
 
                                 {runningStrategy.includes(setup._id) && (

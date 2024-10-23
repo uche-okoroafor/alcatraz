@@ -1,6 +1,8 @@
 /* custom.css */
 body {
-	background-color: #2b3042; /* Light gray background */
+	background-color: #080808; /* Light gray background */
+	font-family: -apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Roboto,
+		Helvetica Neue, Arial, sans-serif !important;
 }
 
 .card-custom {
@@ -10,7 +12,7 @@ body {
 .blinking-dot {
 	width: 15px;
 	height: 15px;
-	background-color: #3fb923;
+	background-color: #3fb923 !important;
 	border-radius: 50%;
 	animation: blink 1s infinite;
 	position: absolute;
@@ -38,7 +40,7 @@ body {
 .static-dot-inactive-market {
 	width: 15px;
 	height: 15px;
-	background-color: #2fa8f6;
+	background-color: #2fa8f6 !important;
 	border-radius: 50%;
 	position: absolute;
 	top: 20px;
@@ -46,41 +48,108 @@ body {
 }
 
 .blinking-dot-error {
-	background-color: rgb(228, 43, 43);
+	background-color: rgb(228, 43, 43) !important;
 	animation: blink 4s infinite;
 }
 
 .static-dot-inactive,
 .static-dot-inactive-market {
-	background-color: #ced10a;
+	background-color: #ced10a !important;
 }
 
 .static-dot-active {
-	background-color: #3fb923;
+	background-color: #3fb923 !important;
 }
 
 .blinking-dot-danger {
-	background-color: #ff0000;
+	background-color: #ff0000 !important;
 	animation: blink 0.7s infinite;
 }
 .sticky-header .blinking-dot-danger,
-.sticky-header .static-dot-active, 
+.sticky-header .static-dot-active,
 .static-dot-inactive-market {
 	left: 105%;
 	top: 35%;
 }
+.strategy-details .card-content p, .MuiTableRow-root th,
+.MuiTableBody-root td{
+	color: #ffffff !important;
+}
 
-.strategy-card {
-	background-color: #ffffff;
-	border: 1px solid #ffffff;
+.strategy-details .card-header {
+	padding-bottom: 10px;
+}
+
+.strategy-card,
+.strategy-details,
+.table-container,
+.form-container {
+	background-color: #232323 !important;
+	border-radius: 10px !important;
+	color: #ffffff !important;
+	/* box-shadow: 0 4px 8px rgb(255, 255, 255);
+	border: 1px solid #ffffff; */
+	transition: box-shadow 0.3s ease;
+}
+
+.css-10d30g3-MuiPaper-root-MuiDialog-paper {
+	background-color: #232323 !important;
+	color: #ffffff !important;
+}
+
+.css-1dfcyzw-MuiPaper-root-MuiPopover-paper {
+	background-color: transparent !important;
+}
+
+.css-1dfcyzw-MuiPaper-root-MuiPopover-paper .MuiListItem-root {
+	background-color: #232323 !important;
+	border-radius: 10px !important;
+	color: #ffffff !important;
+	margin-bottom: 5px;
+	cursor: pointer;
+	/* transition: all ease; */
+}
+
+.css-1dfcyzw-MuiPaper-root-MuiPopover-paper .MuiListItem-root:hover {
+	border: 2px solid #3fb923 !important;
+}
+
+.css-1a1whku-MuiTypography-root {
+	color: #ffffff !important;
+	font-size: 13px !important;
+}
+
+.MuiListItem-root {
+	overflow: hidden !important;
+}
+
+/* App.css */
+.MuiListItem-root::-webkit-scrollbar {
+	display: none !important;
+}
+
+.MuiListItem-root {
+	-ms-overflow-style: none !important; /* Internet Explorer 10+ */
+	scrollbar-width: none !important;
+}
+
+.strategy-card div {
+	color: #ffffff !important;
 	position: relative;
 	cursor: pointer;
-	box-shadow: 0 4px 8px rgb(255, 255, 255);
-	transition: box-shadow 0.3s ease;
 }
 
 .strategy-card:hover {
 	box-shadow: 0 8px 16px rgba(160, 157, 157, 0.692);
+}
+
+.card-header {
+	border-bottom: 1px solid #3c3c3c;
+}
+
+.card-header span {
+	font-size: 24px !important;
+	font-weight: bolder !important;
 }
 
 .progress {
@@ -156,19 +225,47 @@ body {
 	z-index: 1000;
 	padding: 10px 0;
 	width: 100%;
-	background-color: #2b3042;
+	background-color: #080808;
 	margin: 0;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-  }
-  
-  .patch1 {
+}
+
+.patch1 {
 	height: 70px;
 	width: 100%;
 	position: fixed;
 	top: 0;
-	left:0;
+	left: 0;
 	z-index: 1;
-	background-color: #2b3042;
-  }
+	background-color: #080808;
+}
+
+.styles_dot__p5bay > span,
+.styles_dot__p5bay > span > span {
+	animation: styles_pulse-2-5__20mOx 1s linear infinite;
+	border-radius: 50%;
+	display: block;
+	height: 15px;
+	width: 15px;
+	/* background-color: #6eff7a; */
+	background-color: #3fb923;
+	margin-top: 12px;
+	margin-right: 15px;
+}
+
+@keyframes styles_pulse-2-5__20mOx {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	25% {
+		opacity: 0.75;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2);
+	}
+}

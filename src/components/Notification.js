@@ -3,8 +3,9 @@ import { IconButton, Popover, List, ListItem, ListItemText, Badge } from '@mui/m
 import { Notifications } from '@mui/icons-material';
 import signalApi from '../api/signalApi';
 import tone from '../asset/tones/notification-ns.mp3';
+import moment from 'moment';
 
-const Notification = ({ signalAlert, handleCardClick }) => {
+const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [signals, setSignals] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -15,11 +16,14 @@ const Notification = ({ signalAlert, handleCardClick }) => {
             try {
                 const { data } = await signalApi.getList();
                 setSignals(data);
-                const newUnreadCount = data.filter(signal => !signal.is_read).length;
+                const unreadSIgnalsID = data.filter(signal => !signal.is_read).map(signal => signal.setup_id);
+                const newUnreadCount = unreadSIgnalsID.length;
+
                 if (newUnreadCount > unreadCount) {
                     playNotificationSound();
                 }
                 setUnreadCount(newUnreadCount);
+                setNewSignals(unreadSIgnalsID);
             } catch (error) {
                 console.error('Error fetching signals:', error);
             }
@@ -64,6 +68,11 @@ const Notification = ({ signalAlert, handleCardClick }) => {
                 <strong>Take Profit:</strong> {signal.take_profit}  <br />
                 <strong>Stop Loss:</strong> {signal.stop_loss} {' '}
                 <strong>Status:</strong> {signal.status}
+                <div className='text-end'>
+                    <strong>{
+                        moment(signal.updated_at || signal.created_at).fromNow()
+                    }</strong>
+                </div>
             </div>
         );
     };
@@ -106,9 +115,7 @@ const Notification = ({ signalAlert, handleCardClick }) => {
                         signals.map((signal, index) => (
                             <ListItem key={index}
                                 sx={{
-                                    backgroundColor: signal.is_read ? 'white' : '#f0f0f0',
-                                    marginBottom: '5px',
-                                    cursor: 'pointer'
+                                    border: signal.is_read ? 'none' : '2px solid #ffffff'
                                 }}
                             >
                                 <ListItemText

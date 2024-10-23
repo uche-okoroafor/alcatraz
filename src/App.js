@@ -6,7 +6,7 @@ import StrategySetupCards from './components/StrategySetupCards';
 import StrategySetupForm from './components/StrategySetupForm';
 import logos from './asset/images/logo.png';
 import './App.css'; // Import the CSS file
-import SelectedSetupDetails from './components/StrategySetupDatils';
+import SelectedSetupDetails from './components/StrategySetupDetails';
 import io from "socket.io-client";
 import axios from 'axios'; // Import axios for making HTTP requests
 import { SERVER_URL, SOCKET_IO_URL } from './endpoints';
@@ -26,7 +26,7 @@ export default function TradingDashboard() {
   const [runningStrategy, setRunningStrategy] = useState([]);
   const [activeRunningStrategy, setActiveRunningStrategy] = useState({ errors: {} });
   const [newAddedSetup, setNewAddedSetup] = useState(false);
-  const [newSignals, setNewSignals] = useState({});
+  const [newSignals, setNewSignals] = useState([]);
   const [serverError, setServerError] = useState(false);
   const [marketDownTime, setMarketDownTime] = useState(false);
   const [signalAlert, setSignalAlert] = useState([]); // State for unread signals
@@ -76,9 +76,6 @@ export default function TradingDashboard() {
     // Listen for new signals
     socket.on("signal-alert", (data) => {
       console.log('signal-alert')
-      const tempObj = newSignals;
-      tempObj[data.setupId] = data;
-      setNewSignals(tempObj);
       setSignalAlert(data); // Add to unread signals
     });
 
@@ -175,13 +172,13 @@ export default function TradingDashboard() {
               <Notification
                 signalAlert={signalAlert}
                 handleCardClick={handleCardClick}
+                setNewSignals={setNewSignals}
               />
               <Button
-                variant="contained"
-                sx={{ marginLeft: '20px' }}
+                variant="outlined"
+                sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
                 startIcon={<Add />}
                 onClick={() => setOpen(true)}
-                style={{ backgroundColor: '#2fa8f6' }}
               >
                 Add Setup
               </Button>
@@ -229,7 +226,12 @@ export default function TradingDashboard() {
         </>
       ) : (
         <div>
-          <Button variant="contained" onClick={handleBackClick} className="mb-4" style={{ backgroundColor: '#2fa8f6' }}>Back to Setup</Button>
+          <Button
+            variant="outlined"
+            sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
+            onClick={handleBackClick}
+            className="mb-4"
+          >Back to Setup</Button>
           <SelectedSetupDetails
             selectedSetup={selectedSetup}
             onUpdate={setNewAddedSetup}
