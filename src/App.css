@@ -71,8 +71,9 @@ body {
 	left: 105%;
 	top: 35%;
 }
-.strategy-details .card-content p, .MuiTableRow-root th,
-.MuiTableBody-root td{
+.strategy-details .card-content p,
+.MuiTableRow-root th,
+.MuiTableBody-root td {
 	color: #ffffff !important;
 }
 
@@ -121,6 +122,21 @@ body {
 
 .MuiListItem-root {
 	overflow: hidden !important;
+}
+
+.chart {
+	background-color: #080808 !important;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 100%;
+}
+.chart .title {
+	color: #ffffff !important;
+	display: flex;
+	justify-content: space-between;
+	padding: 20px 40px;
 }
 
 /* App.css */

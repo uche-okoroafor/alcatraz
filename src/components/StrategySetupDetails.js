@@ -3,13 +3,18 @@ import moment from 'moment/moment';
 import { Card, CardContent, Typography, Button, CardHeader } from '@mui/material';
 import SignalsTable from './SignalsTable';
 import StrategySetupForm from './StrategySetupForm';
+import Chart from './Chart';
 import setupApi from '../api/setupApi';
+import marketPriceApi from '../api/marketPriceApi';
 
 const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, activeRunningStrategy }) => {
     const [open, setOpen] = useState(false);
+    const [chartOpen, setChartOpen] = useState(false);
     const [initialSetup, setInitialSetup] = useState(null);
     const [focusedSetup, setFocusedSetup] = useState(null);
     const [previousSelectedSetup, setPreviousSelectedSetup] = useState(null);
+    const [signals, setSignals] = useState({});
+    const [priceData, setPriceData] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -27,6 +32,19 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
         }
     }, [previousSelectedSetup?._id, selectedSetup]);
 
+    useEffect(() => {
+        async function fetchPriceData() {
+            const interval = selectedSetup?.time_interval.replace('m', 'min');
+            // const symbol = selectedSetup?.target_asset;
+            // const { data } = await marketPriceApi.fetchMarketPrice(symbol, interval);
+            // setPriceData(data);
+        }
+
+        if (selectedSetup?.target_asset) {
+            fetchPriceData();
+        }
+    }, [selectedSetup]);
+
     const handleEditClick = () => {
         setInitialSetup(focusedSetup);
         setOpen(true);
@@ -34,6 +52,10 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
 
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleShowChartClick = () => {
+        setChartOpen(true);
     };
 
     const getStatusIcon = (setup) => {
@@ -92,9 +114,21 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                         <strong>Last Run Time:</strong>
                         {' '} {moment(focusedSetup?.last_active).format('MMMM Do YYYY, h:mm:ss A')}
                     </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        <strong>Amount:</strong>
+                        {' '} ${focusedSetup?.trade_amount}
+                    </Typography>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button className='mt-2' variant="contained" onClick={handleEditClick} style={{ backgroundColor: '#3FB923' }}>
+                        <Button className='mt-2' variant="contained" onClick={handleShowChartClick}
+                            style={{
+                                backgroundColor: '#2fa8f6',
+                                marginRight: '10px'
+                            }}>
+                            Show Chart
+                        </Button>
+
+                        <Button className='mt-2 ml-5' variant="contained" onClick={handleEditClick} style={{ backgroundColor: '#3FB923' }}>
                             Edit
                         </Button>
                     </div>
@@ -113,7 +147,10 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                 </CardContent>
             </Card>
             <div className='mt-3'>
-                <SignalsTable selectedSetup={selectedSetup} />
+                <SignalsTable
+                    selectedSetup={selectedSetup}
+                    setAllSignals={setSignals}
+                />
             </div>
             <StrategySetupForm
                 open={open}
@@ -124,6 +161,16 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                 setFocusedSetup={setFocusedSetup}
                 onUpdate={onUpdate}
             />
+
+            {chartOpen && focusedSetup?.price_data?.length > 0 && <Chart
+                focusedSetup={focusedSetup}
+                priceData={priceData}
+                signals={signals}
+                open={chartOpen}
+                setChartOpen={setChartOpen}
+            />}
+
+
         </div>
     );
 };

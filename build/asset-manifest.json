@@ -1,16 +1,17 @@
 {
   "files": {
-    "main.css": "./static/css/main.fabfa791.css",
-    "main.js": "./static/js/main.69874e4c.js",
+    "main.css": "./static/css/main.95426e82.css",
+    "main.js": "./static/js/main.9779f11f.js",
     "static/js/453.4447c142.chunk.js": "./static/js/453.4447c142.chunk.js",
-    "static/media/Trading-Strategies-logo-white.png": "./static/media/Trading-Strategies-logo-white.f00d0e85618d5427a0ea.png",
+    "static/media/notification-ns.mp3": "./static/media/notification-ns.0a6c2557f350a9481f0f.mp3",
+    "static/media/logo.png": "./static/media/logo.f00d0e85618d5427a0ea.png",
     "index.html": "./index.html",
-    "main.fabfa791.css.map": "./static/css/main.fabfa791.css.map",
-    "main.69874e4c.js.map": "./static/js/main.69874e4c.js.map",
+    "main.95426e82.css.map": "./static/css/main.95426e82.css.map",
+    "main.9779f11f.js.map": "./static/js/main.9779f11f.js.map",
     "453.4447c142.chunk.js.map": "./static/js/453.4447c142.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.fabfa791.css",
-    "static/js/main.69874e4c.js"
+    "static/css/main.95426e82.css",
+    "static/js/main.9779f11f.js"
   ]
 }

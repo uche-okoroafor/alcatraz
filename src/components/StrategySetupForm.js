@@ -9,8 +9,7 @@ import setupApi from '../api/setupApi';
 const STRATEGIES = [
     { label: 'Peak Drop', value: 'PeakDrop' },
     { label: 'Summit Full', value: 'SummitFull' },
-    { label: 'Tori Trend Line CL', value: 'ToriTrendLineCL' },
-    { label: 'Tori Trend Line GTP', value: 'ToriTrendLineGTP' },
+    { label: 'Tori Trend Line', value: 'ToriTrendLine' },
 ];
 const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', '^SPX', 'TSLA', 'PL=F', 'ETH', 'LTC', 'XRP', 'DOGE'];
 const AGAINST_ASSETS = ['USDT', 'USD', 'EUR', 'GBP'];
@@ -59,7 +58,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
     }, [initialSetup]);
 
     const handleAddSetup = async () => {
-        if (!newSetup.name || !newSetup.strategy_type || !newSetup.target_asset || !newSetup.quote_asset || !newSetup.time_interval) {
+        if (!newSetup.name || !newSetup.strategy_type || !newSetup.target_asset || !newSetup.time_interval) {
             alert('Please fill in all fields');
             return;
         }

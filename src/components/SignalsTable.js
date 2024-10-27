@@ -4,7 +4,7 @@ import { CheckCircle, Error, HourglassEmpty } from '@mui/icons-material';
 import signalApi from '../api/signalApi';
 import moment from 'moment';
 
-const SignalsTable = ({ selectedSetup }) => {
+const SignalsTable = ({ selectedSetup, setAllSignals }) => {
   const [loading, setLoading] = useState(false);
   const [signals, setSignals] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +17,7 @@ const SignalsTable = ({ selectedSetup }) => {
       try {
         const data = await signalApi.fetchSignals(selectedSetup._id, page, pageSize);
         setSignals(data.data);
+        setAllSignals(data.data);
         setTotalSignals(data.navigation.total);
       } catch (error) {
         console.error('Error fetching signals:', error);
@@ -89,6 +90,7 @@ const SignalsTable = ({ selectedSetup }) => {
                 <TableCell>Take Profit</TableCell>
                 <TableCell>Stop Loss</TableCell>
                 <TableCell>Signal</TableCell>
+                <TableCell>Profit/Loss</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Created At</TableCell>
               </TableRow>
@@ -100,6 +102,7 @@ const SignalsTable = ({ selectedSetup }) => {
                   <TableCell>{signal.take_profit}</TableCell>
                   <TableCell>{signal.stop_loss}</TableCell>
                   <TableCell>{signal.signal}</TableCell>
+                  <TableCell>{signal?.profit_loss}</TableCell>
                   <TableCell>{getStatusIcon(signal.status)}</TableCell>
                   <TableCell>
                     {moment(signal?.created_at).format('MMMM Do YYYY, h:mm:ss A')}
