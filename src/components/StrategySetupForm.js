@@ -25,6 +25,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
         dip_percentage: 0,
         is_deleted: false,
         is_active: true,
+        time_frame: '', // Added new field
     });
 
     const [updatedFields, setUpdatedFields] = useState({});
@@ -38,6 +39,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
         dip_percentage: 0,
         is_deleted: false,
         is_active: true,
+        time_frame: '', // Added new field
     };
 
     const [loading, setLoading] = useState(false);
@@ -53,6 +55,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                 dip_percentage: initialSetup.dip_percentage,
                 is_deleted: initialSetup.is_deleted,
                 is_active: initialSetup.is_active,
+                time_frame: initialSetup.time_frame || '', // Added new field
             });
         }
     }, [initialSetup]);
@@ -312,6 +315,40 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                                 },
                             }}
                             placeholder="Enter dip percentage"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: 'white',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'white',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'white',
+                                    },
+                                },
+                                '& .MuiInputBase-input::placeholder': {
+                                    color: 'white',
+                                },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Time Frame" // Added new field
+                            type="text"
+                            name="time_frame"
+                            value={newSetup.time_frame}
+                            onChange={(e) => handleChange(e)}
+                            InputLabelProps={{ style: { color: 'white' } }}
+                            InputProps={{
+                                style: { color: 'white' },
+                                classes: {
+                                    notchedOutline: 'white-border',
+                                },
+                            }}
+                            placeholder="Enter time frame"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': {
