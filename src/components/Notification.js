@@ -93,6 +93,7 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
                 </Badge>
             </IconButton>
             <Popover
+                className='notification-list'
                 id={id}
                 open={openPopover}
                 anchorEl={anchorEl}
@@ -106,7 +107,7 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
                     horizontal: 'center',
                 }}
             >
-                <List>
+                <List >
                     {signals.length === 0 ? (
                         <ListItem>
                             <ListItemText primary="No new signals" />

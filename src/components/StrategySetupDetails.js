@@ -116,7 +116,7 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         <strong>Amount:</strong>
-                        {' '} ${focusedSetup?.trade_amount}
+                        {' '} ${typeof focusedSetup?.trade_amount === 'number' ? focusedSetup?.trade_amount.toFixed(2) : 'N/A'}
                     </Typography>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

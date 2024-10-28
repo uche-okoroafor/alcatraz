@@ -98,20 +98,20 @@ body {
 	color: #ffffff !important;
 }
 
-.css-1dfcyzw-MuiPaper-root-MuiPopover-paper {
+.notification-list .MuiPaper-root{
 	background-color: transparent !important;
 }
 
-.css-1dfcyzw-MuiPaper-root-MuiPopover-paper .MuiListItem-root {
+.notification-list .MuiPaper-root .MuiListItem-root {
 	background-color: #232323 !important;
 	border-radius: 10px !important;
 	color: #ffffff !important;
 	margin-bottom: 5px;
 	cursor: pointer;
-	/* transition: all ease; */
+	 transition: all ease; 
 }
 
-.css-1dfcyzw-MuiPaper-root-MuiPopover-paper .MuiListItem-root:hover {
+.notification-list .MuiPaper-root .MuiListItem-root:hover {
 	border: 2px solid #3fb923 !important;
 }
 

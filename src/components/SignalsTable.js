@@ -99,10 +99,16 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
               {signals.map((signal) => (
                 <TableRow key={signal._id}>
                   <TableCell>{signal.signal_price}</TableCell>
-                  <TableCell>{signal.take_profit}</TableCell>
-                  <TableCell>{signal.stop_loss}</TableCell>
+                  <TableCell>
+                    {typeof signal.take_profit === 'number' ? signal.take_profit.toFixed(2) : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    {typeof signal.stop_loss === 'number' ? signal.stop_loss.toFixed(2) : 'N/A'}
+                  </TableCell>
                   <TableCell>{signal.signal}</TableCell>
-                  <TableCell>{signal?.profit_loss}</TableCell>
+                  <TableCell>
+                    {typeof signal?.profit_loss === 'number' ? signal.profit_loss.toFixed(2) : 'N/A'}
+                  </TableCell>
                   <TableCell>{getStatusIcon(signal.status)}</TableCell>
                   <TableCell>
                     {moment(signal?.created_at).format('MMMM Do YYYY, h:mm:ss A')}
