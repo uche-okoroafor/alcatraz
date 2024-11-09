@@ -10,6 +10,9 @@ const STRATEGIES = [
     { label: 'Peak Drop', value: 'PeakDrop' },
     { label: 'Summit Full', value: 'SummitFull' },
     { label: 'Tori Trend Line', value: 'ToriTrendLine' },
+    { label: 'Consolidation Breakout', value: 'ConsolidationBreakout' },
+    { label: 'Double 7', value: 'Double7' },
+    { label: 'TrendLineSRSD', value: 'TrendLineSRSD' },
 ];
 const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', '^SPX', 'TSLA', 'PL=F', 'ETH', 'LTC', 'XRP', 'DOGE'];
 const AGAINST_ASSETS = ['USDT', 'USD', 'EUR', 'GBP'];

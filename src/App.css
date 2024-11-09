@@ -115,13 +115,9 @@ body {
 	border: 2px solid #3fb923 !important;
 }
 
-.css-1a1whku-MuiTypography-root {
+.notification-list p {
 	color: #ffffff !important;
 	font-size: 13px !important;
-}
-
-.MuiListItem-root {
-	overflow: hidden !important;
 }
 
 .chart {
@@ -139,15 +135,6 @@ body {
 	padding: 20px 40px;
 }
 
-/* App.css */
-.MuiListItem-root::-webkit-scrollbar {
-	display: none !important;
-}
-
-.MuiListItem-root {
-	-ms-overflow-style: none !important; /* Internet Explorer 10+ */
-	scrollbar-width: none !important;
-}
 
 .strategy-card div {
 	color: #ffffff !important;

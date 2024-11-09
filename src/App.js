@@ -75,7 +75,7 @@ export default function TradingDashboard() {
   useEffect(() => {
     // Listen for new signals
     socket.on("signal-alert", (data) => {
-      console.log('signal-alert')
+      console.log('signal-alert', data)
       setSignalAlert(data); // Add to unread signals
     });
 
