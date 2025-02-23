@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, SwitchAccountOutlined } from '@mui/icons-material'; // Import SwitchAccountOutlined icon
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StrategySetupCards from './components/StrategySetupCards';
+import ScannerCards from './components/ScannerCards';
 import StrategySetupForm from './components/StrategySetupForm';
+import ScannerForm from './components/ScannerForm';
 import logos from './asset/images/logo.png';
 import './App.css'; // Import the CSS file
 import SelectedSetupDetails from './components/StrategySetupDetails';
@@ -30,6 +32,8 @@ export default function TradingDashboard() {
   const [serverError, setServerError] = useState(false);
   const [marketDownTime, setMarketDownTime] = useState(false);
   const [signalAlert, setSignalAlert] = useState([]); // State for unread signals
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [isStrategies, setIsStrategies] = useState(true);
 
   useEffect(() => {
     // Listen for new signals
@@ -169,18 +173,30 @@ export default function TradingDashboard() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
+
               <Notification
                 signalAlert={signalAlert}
                 handleCardClick={handleCardClick}
                 setNewSignals={setNewSignals}
+                soundEnabled={soundEnabled}
+                setSoundEnabled={setSoundEnabled}
               />
+
+              <Button
+                variant="outlined"
+                sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
+                startIcon={<SwitchAccountOutlined />} // Add SwitchAccountOutlined icon
+                onClick={() => setIsStrategies(!isStrategies)}
+              >
+                {isStrategies ? 'Strategies' : 'Scanner'}
+              </Button>
               <Button
                 variant="outlined"
                 sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
                 startIcon={<Add />}
                 onClick={() => setOpen(true)}
               >
-                Add Setup
+                {isStrategies ? 'Add Setup' : 'Add Scanner'}
               </Button>
             </div>
           </div>
@@ -207,7 +223,7 @@ export default function TradingDashboard() {
             </div>
           )}
 
-          <StrategySetupCards
+          {isStrategies ? <StrategySetupCards
             handleCardClick={handleCardClick}
             setLoading={setLoading}
             runningStrategy={runningStrategy}
@@ -215,14 +231,28 @@ export default function TradingDashboard() {
             activeRunningStrategy={activeRunningStrategy}
             setActiveRunningStrategy={setActiveRunningStrategy}
             newSignals={newSignals}
-          />
+          /> :
+            <ScannerCards
+              handleCardClick={handleCardClick}
+              setLoading={setLoading}
+              runningStrategy={runningStrategy}
+              newAddedSetup={newAddedSetup}
+              activeRunningStrategy={activeRunningStrategy}
+              setActiveRunningStrategy={setActiveRunningStrategy}
+              newSignals={newSignals}
+            />}
 
-          <StrategySetupForm
+          {isStrategies ? <StrategySetupForm
             open={open}
             onClose={() => setOpen(false)}
             setOpen={setOpen}
             onUpdate={setNewAddedSetup}
-          />
+          /> : <ScannerForm
+            open={open}
+            onClose={() => setOpen(false)}
+            setOpen={setOpen}
+            onUpdate={setNewAddedSetup}
+          />}
         </>
       ) : (
         <div>

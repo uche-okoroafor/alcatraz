@@ -5,7 +5,7 @@ import signalApi from '../api/signalApi';
 import tone from '../asset/tones/notification-ns.mp3';
 import moment from 'moment';
 
-const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
+const Notification = ({ signalAlert, handleCardClick, setNewSignals , soundEnabled, setSoundEnabled }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [signals, setSignals] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -19,7 +19,7 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
                 const unreadSIgnalsID = data.filter(signal => !signal.is_read).map(signal => signal.setup_id);
                 const newUnreadCount = unreadSIgnalsID.length;
 
-                if (newUnreadCount > unreadCount) {
+                if (newUnreadCount > unreadCount && soundEnabled) {
                     playNotificationSound();
                 }
                 setUnreadCount(newUnreadCount);
@@ -30,7 +30,7 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
         };
 
         fetchSignals();
-    }, [signalAlert, unreadCount]);
+    }, [signalAlert, unreadCount, soundEnabled, setNewSignals]);
 
     const playNotificationSound = () => {
         if (audioRef.current) {
@@ -77,12 +77,17 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
         );
     };
 
+    const toggleSound = () => {
+        setSoundEnabled(!soundEnabled);
+    };
+
     const openPopover = Boolean(anchorEl);
     const id = openPopover ? 'simple-popover' : undefined;
 
     return (
         <>
             <audio ref={audioRef} src={tone} />
+
             <IconButton
                 aria-describedby={id}
                 onClick={handleNotificationClick}
@@ -107,7 +112,11 @@ const Notification = ({ signalAlert, handleCardClick, setNewSignals }) => {
                     horizontal: 'center',
                 }}
             >
+
                 <List >
+                    <ListItem button onClick={toggleSound}>
+                        <ListItemText primary={soundEnabled ? "Disable Notifications Sound" : "Enable Notifications Sound"} />
+                    </ListItem>
                     {signals.length === 0 ? (
                         <ListItem>
                             <ListItemText primary="No new signals" />
