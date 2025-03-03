@@ -53,7 +53,7 @@ export default function TradingDashboard() {
       }, 5000);
     });
 
-    // Clean up the effect
+    // Clean up the effect on unmount
     return () => {
       socket.off("running-strategy");
     };
