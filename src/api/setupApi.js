@@ -42,7 +42,7 @@ const setupApi = {
 
   fetchSetups: async (page, pageSize) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/strategy-setups?page=${page}&limit=${pageSize}&sort=created_at^:desc`);
+      const response = await axios.get(`${API_BASE_URL}/strategy-setups?page=${page}&limit=${pageSize}&sort=updated_at^:desc`);
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);

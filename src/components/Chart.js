@@ -1,322 +1,441 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, IconButton } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, IconButton, Select, MenuItem } from '@mui/material';
 import ReactECharts from 'echarts-for-react';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { calculateMA, convertToRawData } from '../helpers';
+import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
+import { formatISO, subDays } from 'date-fns'; // Import date-fns for date manipulation
+import marketPriceApi from '../api/marketPriceApi'; // Import your market price API
 
 const Chart = ({ setChartOpen, focusedSetup, signals }) => {
-  const initialData = focusedSetup?.price_data;
-  const [replayOpen, setReplayOpen] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
-  const [replaySpeed, setReplaySpeed] = useState(1);
-  const [priceData, setPriceData] = useState(initialData);
-  const [dataCounter, setDataCounter] = useState(0);
-  const [intervalId, setIntervalId] = useState(null);
-  let replayData = false;
+  const initialData = focusedSetup;
+  const chartContainerRef = useRef(null);
+  const [data, setData] = useState([]);
+  const [symbol, setSymbol] = useState('XAUUSD');
+  const [timeFrame, setTimeFrame] = useState('1min');
+  const [fromDate, setFromDate] = useState(formatISO(subDays(new Date(), 5), { representation: 'date' })); // Default to 5 days ago
+  const [toDate, setToDate] = useState(formatISO(new Date(), { representation: 'date' })); // Default to today
+  const [tooltip, setTooltip] = useState(null);
+  const [indicator, setIndicator] = useState('None'); // Default to no indicator
+  const [fetchDbData, setFetchDbData] = useState(true);
 
   const signal = signals[0];
 
-  const entryLabel = signal?.signal || 'Entry';
   const entryPrice = signal?.signal_price || 0;
   const isBuy = signal?.signal?.toLowerCase() === 'buy';
   const aboveEntryPrice = signal?.take_profit || 0;
   const belowEntryPrice = signal?.stop_loss || 0;
 
-  const trendLineY1 = 100;
-  const trendLineY2 = 120;
-
   useEffect(() => {
     if (initialData) {
-      setPriceData(initialData);
+      const symbol = initialData.symbol || initialData.symbol || 'XAUUSD';
+      const timeFrame = '1min';
+      const defaultFromDate = formatISO(subDays(new Date(), 5), { representation: 'date' });
+      const defaultToDate = formatISO(new Date(), { representation: 'date' });
+
+      setSymbol(symbol);
+      setTimeFrame(timeFrame);
+      setFromDate(defaultFromDate);
+      setToDate(defaultToDate);
+
+      fetchData(symbol, timeFrame, defaultFromDate, defaultToDate);
+    } else {
+      fetchData();
     }
+  }, []);
 
-  }, [initialData]);
+  const fetchData = async (ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate) => {
 
-  const rawData = replayData || priceData?.length > 0 ? convertToRawData(priceData) : [];
+    ptSymbol = ptSymbol || symbol;
+    psTimeFrame = psTimeFrame || timeFrame;
+    psDefaultFromDate = psDefaultFromDate || fromDate;
+    psDefaultToDate = psDefaultToDate || toDate;
+    try {
 
-  const dates = rawData?.map(function (item) {
-    return item[0];
-  }).reverse();
-  const data = rawData?.map(function (item) {
-    return [+item[1], +item[2], +item[5], +item[6]];
-  }).reverse();
+      const response = await marketPriceApi.fetchMarketPrice(ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate, fetchDbData);
+      const result = await response.data;
 
-  const handleReplayClick = () => {
-    setReplayOpen(true);
+      // Convert the API data to the required format
+      const formattedData = result
+        .map((item, index) => ({
+          time: Math.floor(new Date(item.date).getTime() / 1000) + index, // Add index to ensure unique time
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+          volume: item.volume,
+        }))
+        .sort((a, b) => a.time - b.time); // Sort by time
+
+      setData(formattedData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
-  const handleReplayClose = () => {
-    setReplayOpen(false);
+  const handleEnterClick = () => {
+    if (data.length === 0) setFetchDbData(false);
+    fetchData();
   };
 
-  const handleReplay = () => {
-    const tempData = [];
-    replayData = []
-    let counter = 0;
+  useEffect(() => {
+    if (data.length === 0) return;
 
-    priceData.forEach((item) => {
-      if (item.date >= startDate && item.date <= endDate) {
-        tempData.push(item);
-      }
+    // Create the chart instance with dark theme
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.offsetWidth,
+      height: chartContainerRef.current.offsetHeight,
+      layout: {
+        background: { type: 'solid', color: '#1e1e1e' }, // Dark background
+        textColor: '#d1d4dc', // Light text color
+      },
+      grid: {
+        vertLines: { color: '#2b2b2b' }, // Darker grid lines
+        horzLines: { color: '#2b2b2b' },
+      },
+      timeScale: {
+        timeVisible: true, // Enable time visibility on the x-axis
+        secondsVisible: true, // Show seconds for finer granularity
+      },
     });
 
+    // Add a candlestick series to the chart
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: 'green',
+      downColor: 'red',
+      borderVisible: false,
+      wickUpColor: 'green',
+      wickDownColor: 'red',
+    });
 
-    setPriceData([]);
-    setDataCounter(0);
+    // Set the fetched data for the candlestick series
+    candlestickSeries.setData(data);
 
-    const id = setInterval(() => {
-      const arrData = [...replayData];
-      arrData.push(tempData[counter]);
-      replayData = arrData;
-      counter++
+    // // Add a vertical line for the entry signal
+    // if (entryPrice) {
+    //   const cloneData = structuredClone(data);
+    //   const entryCandle = cloneData.find((candle) => candle.close === entryPrice);
+    //   if (entryCandle) {
+    //     const verticalLineSeries = chart.addSeries(LineSeries, {
+    //       color: 'blue',
+    //       lineWidth: 1,
+    //     });
+    //     verticalLineSeries.setData([
+    //       { time: entryCandle.time, value: Math.min(...cloneData.map((c) => c.low)) },
+    //       { time: entryCandle.time, value: Math.max(...cloneData.map((c) => c.high)) },
+    //     ]);
+    //   }
+    // }
 
-    }, replaySpeed * 1000);
+    // Center the chart on the current price
+    const visibleRange = chart.timeScale().getVisibleRange();
+    if (visibleRange) {
+      const centerOffset = Math.floor((visibleRange.to - visibleRange.from) / 800);
+      chart.timeScale().scrollToPosition(centerOffset, false);
+    }
 
-    setIntervalId(id);
-    setReplayOpen(false);
-  };
 
+    // Add horizontal lines for signal_price, take_profit, and stop_loss
+    if (entryPrice) {
+      const entryLine = chart.addSeries(LineSeries, {
+        color: 'blue',
+        lineWidth: 2,
+      });
+      entryLine.setData([{ time: data[0].time, value: entryPrice }, { time: data[data.length - 1].time, value: entryPrice }]);
+      entryLine.createPriceLine({
+        price: entryPrice,
+        color: 'blue',
+        lineWidth: 1,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: 'Entry',
+      });
+    }
 
-  const option = {
-    legend: {
-      data: ['Day', 'MA5', 'MA10', 'MA20', 'MA30'],
-      inactiveColor: '#777',
-      selected: {
-        'MA5': false,
-        'MA10': false,
-        'MA20': false,
-        'MA30': false
-      }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        animation: false,
-        type: 'cross',
-        lineStyle: {
-          color: '#376df4',
-          width: 2,
-          opacity: 1
-        }
-      }
-    },
-    xAxis: {
-      type: 'category',
-      data: dates,
-      axisLine: { lineStyle: { color: '#8392A5' } },
-      axisLabel: {
-        align: 'left' // Align the labels to the left
-      }
-    },
-    yAxis: {
-      scale: true,
-      position: 'right', // Position the y-axis labels on the right side
-      axisLine: { lineStyle: { color: '#8392A5' } },
-      splitLine: { show: false },
-      axisLabel: {
-        align: 'right' // Align the labels to the right
-      }
-    },
-    grid: {
-      bottom: 80
-    },
-    dataZoom: [
-      {
-        textStyle: {
-          color: '#8392A5'
-        },
-        handleIcon:
-          'path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-        dataBackground: {
-          areaStyle: {
-            color: '#8392A5'
-          },
-          lineStyle: {
-            opacity: 0.8,
-            color: '#8392A5'
-          }
-        },
-        brushSelect: true
-      },
-      {
-        type: 'inside'
-      }
-    ],
-    series: [
-      {
-        type: 'candlestick',
-        name: 'Day',
-        data: data,
-        itemStyle: {
-          color: '#FD1050',
-          color0: '#0CF49B',
-          borderColor: '#FD1050',
-          borderColor0: '#0CF49B'
-        },
-        markLine: {
-          symbol: ['none', 'none'],
-          data: [
-            { name: entryLabel, yAxis: entryPrice, lineStyle: { color: 'orange' } },
-            { name: isBuy ? 'TP' : 'SL', yAxis: aboveEntryPrice, lineStyle: { color: isBuy ? 'green' : 'red' } },
-            { name: !isBuy ? 'TP' : 'SL', yAxis: belowEntryPrice, lineStyle: { color: !isBuy ? 'green' : 'red' } },
-            [
-              {
-                name: 'Trendline',
-                coord: [0, trendLineY1],
-                symbol: 'none',
-                lineStyle: { type: 'solid', color: 'purple' },
-              },
-              {
-                coord: [dates.length - 1, trendLineY2],
-                symbol: 'none'
-              }
-            ]
-          ],
-          label: {
-            position: 'start', // Position the label at the end of the line (right side)
-            formatter: (params) => {
-              if (params.name === 'Trendline') {
-                return '';
-              }
-              return `${params.name}: ${params.value}`;
+    if (aboveEntryPrice) {
+      const tpLine = chart.addSeries(LineSeries, {
+        color: 'green',
+        lineWidth: 2,
+      });
+      tpLine.setData([{ time: data[0].time, value: aboveEntryPrice }, { time: data[data.length - 1].time, value: aboveEntryPrice }]);
+      tpLine.createPriceLine({
+        price: aboveEntryPrice,
+        color: 'green',
+        lineWidth: 1,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: 'TP',
+      });
+    }
+
+    if (belowEntryPrice) {
+      const slLine = chart.addSeries(LineSeries, {
+        color: 'red',
+        lineWidth: 2,
+      });
+      slLine.setData([{ time: data[0].time, value: belowEntryPrice }, { time: data[data.length - 1].time, value: belowEntryPrice }]);
+      slLine.createPriceLine({
+        price: belowEntryPrice,
+        color: 'red',
+        lineWidth: 1,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: 'SL',
+      });
+    }
+
+    let indicatorSeries = null;
+
+    if (indicator === 'SMA') {
+      // Add a moving average (SMA) indicator
+      const calculateSMA = (data, period) => {
+        const sma = [];
+        for (let i = 0; i < data.length; i++) {
+          if (i >= period - 1) {
+            const sum = data.slice(i - period + 1, i + 1).reduce((acc, item) => acc + item.close, 0);
+            const value = sum / period;
+            if (!isNaN(value)) {
+              sma.push({ time: data[i].time, value });
             }
           }
         }
-      },
-      {
-        name: 'MA5',
-        type: 'line',
-        data: calculateMA(5, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 1
-        }
-      },
-      {
-        name: 'MA10',
-        type: 'line',
-        data: calculateMA(10, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 1
-        }
-      },
-      {
-        name: 'MA20',
-        type: 'line',
-        data: calculateMA(20, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 1
-        }
-      },
-      {
-        name: 'MA30',
-        type: 'line',
-        data: calculateMA(30, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 1
-        }
+        return sma;
+      };
+
+      const smaData = calculateSMA(data, 10); // Calculate 10-period SMA
+      indicatorSeries = chart.addSeries(LineSeries, {
+        color: 'blue',
+        lineWidth: 2,
+      });
+      indicatorSeries.setData(smaData);
+    } else if (indicator === 'VWAP') {
+      // Add a VWAP indicator
+      const calculateVWAP = (data) => {
+        let cumulativeVolume = 0;
+        let cumulativePriceVolume = 0;
+        return data.map((item) => {
+          cumulativeVolume += item.volume;
+          cumulativePriceVolume += (item.high + item.low + item.close) / 3 * item.volume;
+          const value = cumulativePriceVolume / cumulativeVolume;
+          return !isNaN(value) ? { time: item.time, value } : null;
+        }).filter((point) => point !== null); // Exclude invalid points
+      };
+
+      const vwapData = calculateVWAP(data);
+      indicatorSeries = chart.addSeries(LineSeries, {
+        color: 'orange',
+        lineWidth: 2,
+      });
+      indicatorSeries.setData(vwapData);
+    }
+
+    // Add a tooltip to display candlestick and indicator details
+    const handleCrosshairMove = (event) => {
+      if (!event.time || !event.seriesData) {
+        setTooltip(null);
+        return;
       }
-    ],
-  };
+
+      const seriesData = event.seriesData.get(candlestickSeries);
+      const indicatorPoint =
+        indicatorSeries && indicatorSeries.data().find((point) => point.time === event.time);
+
+      if (seriesData) {
+        setTooltip({
+          time: new Date(event.time * 1000).toLocaleString(),
+          open: seriesData.open,
+          high: seriesData.high,
+          low: seriesData.low,
+          close: seriesData.close,
+          volume: seriesData.volume,
+          indicator: indicatorPoint ? indicatorPoint.value : 'N/A',
+        });
+      }
+    };
+
+    chart.subscribeCrosshairMove(handleCrosshairMove);
+
+    // Fit the chart content to the data
+    chart.timeScale().fitContent();
+
+    // Resize the chart when the window size changes
+    const handleResize = () => {
+      chart.applyOptions({
+        width: chartContainerRef.current.offsetWidth,
+        height: chartContainerRef.current.offsetHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.unsubscribeCrosshairMove(handleCrosshairMove);
+      chart.remove();
+    };
+  }, [data, indicator]);
+
+
 
   return (
     <div className='chart'>
-      <div className='title'>
-        <h4>Chart</h4>
+      <div style={{
+        padding: '10px',
+        backgroundColor: '#080808',
+        color: '#d1d4dc',
+        marginBottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <TextField
+          variant="outlined"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+          size="small"
+          style={{
+            margin: '0 10px',
+            width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+            borderRadius: '4px',
+          }}
+          InputProps={{
+            style: { color: '#000', height: '30px' },
+          }}
+        />
+        <Select
+          value={timeFrame}
+          onChange={(e) => setTimeFrame(e.target.value)}
+          size="small"
+          style={{
+            margin: '0 10px',
+            width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+          }}
+          MenuProps={{
+            PaperProps: {
+              style: { backgroundColor: '#ffffff', color: '#000' },
+            },
+          }}
+        >
+          <MenuItem value="1min">1 Minute</MenuItem>
+          <MenuItem value="5min">5 Minutes</MenuItem>
+          <MenuItem value="15min">15 Minutes</MenuItem>
+          <MenuItem value="30min">30 Minutes</MenuItem>
+          <MenuItem value="1hour">1 Hour</MenuItem>
+          <MenuItem value="4hour">4 Hours</MenuItem>
+        </Select>
+        <TextField
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          size="small"
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+          style={{
+            margin: '0 10px',
+            width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+            borderRadius: '4px',
+          }}
+          InputProps={{
+            style: { color: '#000', height: '30px' },
+          }}
+        />
+        <TextField
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          size="small"
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+          style={{
+            margin: '0 10px',
+            width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+            borderRadius: '4px',
+          }}
+          InputProps={{
+            style: { color: '#000', height: '30px' },
+          }}
+        />
+        <Select
+          value={indicator}
+          onChange={(e) => setIndicator(e.target.value)}
+          size="small"
+          style={{
+            margin: '0 10px',
+            width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+          }}
+          MenuProps={{
+            PaperProps: {
+              style: { backgroundColor: '#ffffff', color: '#000' },
+            },
+          }}
+        >
+          <MenuItem value="None">None</MenuItem>
+          <MenuItem value="SMA">SMA</MenuItem>
+          <MenuItem value="VWAP">VWAP</MenuItem>
+        </Select>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleEnterClick}
+          style={{
+            marginLeft: '10px',
+            height: '30px',
+            fontSize: '12px',
+            backgroundColor: '#2fa8f6',
+          }}
+        >
+          Enter
+        </Button>
 
-
-        <div>
-          <Button
-            variant="outlined"
-            onClick={handleReplayClick}
-            sx={{
-              marginRight: '10px',
-              color: 'white',
-              backgroundColor: '#2fa8f6',
-            }}
-          >
-            Replay
-          </Button>
-
-          <Button variant="outlined" onClick={() => setChartOpen(false)}>
-            Close
-          </Button>
-        </div>
-
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => setChartOpen(false)}
+          style={{
+            marginLeft: '60px',
+            height: '30px',
+            fontSize: '12px',
+            backgroundColor: '#3FB923',
+          }}
+        >
+          Close
+        </Button>
       </div>
-      <ReactECharts option={option} style={{
-        height: '600px',
-        width: '100%',
-      }} />
-
-
-      <Dialog open={replayOpen} onClose={handleReplayClose} PaperProps={{ sx: { backgroundColor: '#232323', color: 'white' } }}>
-        <DialogTitle sx={{ color: 'white' }}>Replay Chart</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Start Date"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-              style: { color: 'white' }
-            }}
-            InputProps={{
-              style: { color: 'white' }
-            }}
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-              style: { color: 'white' }
-            }}
-            InputProps={{
-              style: { color: 'white' }
-            }}
-            sx={{ marginTop: '20px' }}
-          />
-          <TextField
-            label="Replay Speed (seconds per step)"
-            type="number"
-            value={replaySpeed}
-            onChange={(e) => setReplaySpeed(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-              style: { color: 'white' }
-            }}
-            InputProps={{
-              style: { color: 'white' }
-            }}
-            sx={{ marginTop: '20px' }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleReplayClose} sx={{ color: 'white' }}>
-            Cancel
-          </Button>
-          <Button onClick={handleReplay} sx={{ color: 'white' }}>
-            Replay
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <div
+        ref={chartContainerRef}
+        style={{
+          top: '50px',
+          left: 0,
+          width: '100%',
+          height: 'calc(100% - 50px)',
+        }}
+      />
+      {tooltip && (
+        <div>
+          <div>Time: {tooltip.time}</div>
+          <div>Open: {tooltip.open}</div>
+          <div>High: {tooltip.high}</div>
+          <div>Low: {tooltip.low}</div>
+          <div>Close: {tooltip.close}</div>
+          <div>Volume: {tooltip.volume}</div>
+          <div>{indicator}: {tooltip.indicator}</div>
+        </div>
+      )}
     </div>
-  )
+  );
 };
 
 export default Chart;

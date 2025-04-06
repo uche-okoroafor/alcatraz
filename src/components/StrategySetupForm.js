@@ -16,7 +16,6 @@ const STRATEGIES = [
     { label: 'TrendLineSRSD', value: 'TrendLineSRSD' },
     { label: 'Stock Scanner Short', value: 'StockScannerShort' },
 ];
-const TARGET_ASSETS = ['SPY', '^NDX', 'NVDA', 'RTX', 'XAUUSD', 'CCJ', 'AAPL', '^SPX', 'TSLA', 'PL=F', 'ETH', 'LTC', 'XRP', 'DOGE'];
 const TIMEFRAMES = ['1m', '2m', '3m', '4m', '5m', '15m', '30m', '1h', '4h', '1d'];
 
 
@@ -24,8 +23,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
     const [newSetup, setNewSetup] = useState({
         name: '',
         strategy_type: '',
-        target_asset: '',
-        quote_asset: '',
+        symbol: '', // Renamed from symbol
         time_interval: '',
         dip_percentage: 0,
         is_deleted: false,
@@ -41,8 +39,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
     const defaultSetup = {
         name: '',
         strategy_type: '',
-        target_asset: '',
-        quote_asset: '',
+        symbol: '', // Renamed from symbol
         time_interval: '',
         dip_percentage: 0,
         is_deleted: false,
@@ -66,8 +63,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
             setNewSetup({
                 name: initialSetup.name,
                 strategy_type: initialSetup.strategy_type,
-                target_asset: initialSetup.target_asset,
-                quote_asset: initialSetup.quote_asset,
+                symbol: initialSetup.symbol || '', // Renamed from symbol
                 time_interval: initialSetup.time_interval,
                 dip_percentage: initialSetup.dip_percentage,
                 is_deleted: initialSetup.is_deleted,
@@ -81,8 +77,8 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
     }, [initialSetup]);
 
     const handleAddSetup = async () => {
-        if ((!newSetup.name || !newSetup.strategy_type || !newSetup.target_asset || !newSetup.time_interval) && !isScannerSelected) {
-            alert(`Field ${!newSetup.name ? 'Name' : !newSetup.strategy_type ? 'Strategy' : !newSetup.target_asset ? 'Target Asset' : 'Time Interval'} is required`);
+        if ((!newSetup.name || !newSetup.strategy_type || !newSetup.symbol || !newSetup.time_interval) && !isScannerSelected) {
+            alert(`Field ${!newSetup.name ? 'Name' : !newSetup.strategy_type ? 'Strategy' : !newSetup.symbol ? 'Symbol' : 'Time Interval'} is required`);
             return;
         }
 
@@ -231,11 +227,10 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
-                                select
-                                label="Target Asset"
-                                name="target_asset"
-                                value={newSetup.target_asset}
-                                onChange={(e) => handleChange(e)}
+                                label="Symbol" // Renamed from Target Asset
+                                name="symbol" // Updated name
+                                value={newSetup.symbol} // Updated value
+                                onChange={(e) => handleChange(e)} // Updated handler
                                 InputLabelProps={{ style: { color: 'white' } }}
                                 InputProps={{
                                     style: { color: 'white' },
@@ -243,7 +238,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                                         notchedOutline: 'white-border',
                                     },
                                 }}
-                                placeholder="Select target asset"
+                                placeholder="Enter symbol" // Updated placeholder
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         '& fieldset': {
@@ -260,50 +255,8 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
                                         color: 'white',
                                     },
                                 }}
-                            >
-                                {TARGET_ASSETS.map(asset => (
-                                    <MenuItem key={asset} value={asset}>{asset}</MenuItem>
-                                ))}
-                            </TextField>
+                            />
                         </Grid>
-                        {/* <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Against Asset"
-                                name="quote_asset"
-                                value={newSetup.quote_asset}
-                                onChange={(e) => handleChange(e)}
-                                InputLabelProps={{ style: { color: 'white' } }}
-                                InputProps={{
-                                    style: { color: 'white' },
-                                    classes: {
-                                        notchedOutline: 'white-border',
-                                    },
-                                }}
-                                placeholder="Select against asset"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                    },
-                                    '& .MuiInputBase-input::placeholder': {
-                                        color: 'white',
-                                    },
-                                }}
-                            >
-                                {AGAINST_ASSETS.map(asset => (
-                                    <MenuItem key={asset} value={asset}>{asset}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid> */}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth

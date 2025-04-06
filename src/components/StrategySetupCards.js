@@ -3,6 +3,8 @@ import { Card, CardHeader, CardContent, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import setupApi from '../api/setupApi';
 import { calculateTimeout } from '../helpers';
+import { socket } from '../connection/socketIo';
+import moment from 'moment';
 
 const StrategySetupCards = (props) => {
     const { setLoading, handleCardClick, runningStrategy, newAddedSetup, activeRunningStrategy, setActiveRunningStrategy, newSignals } = props;
@@ -20,7 +22,9 @@ const StrategySetupCards = (props) => {
             const data = await setupApi.fetchSetups(page, pageSize);
             const newSetups = data.data.filter(setup => !setupIds.current.has(setup._id));
             newSetups.forEach(setup => setupIds.current.add(setup._id));
-            setSetups(prevSetups => [...prevSetups, ...newSetups]);
+            setSetups(prevSetups => [...prevSetups, ...newSetups]
+                // .sort((a, b) => new Date(b.is_active) - new Date(a.is_active))
+            );
             setTotalSetups(data.navigation.total);
         } catch (error) {
             console.error('Error fetching setups:', error);
@@ -124,8 +128,10 @@ const StrategySetupCards = (props) => {
                                 <div className='d-flex justify-content-between'>
                                     <div >
                                         <Typography><strong>Strategy:</strong> {setup.strategy_type}</Typography>
-                                        <Typography><strong>Asset:</strong> {setup.target_asset}</Typography>
+                                        <Typography><strong>Symbol:</strong> {setup.symbol}</Typography>
                                         <Typography><strong>Time Interval:</strong> {setup.time_interval}</Typography>
+                                        {/* <Typography><strong>Last Active:</strong> {' '} 
+                                        {moment(setup?.last_active).format('MMMM Do YYYY, h:mm:ss A')}</Typography> */}
                                     </div>
                                     {newSignals.includes(setup._id) && <NotificationsIcon className='bell mt-4' />}
                                 </div>

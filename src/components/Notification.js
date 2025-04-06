@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { IconButton, Popover, List, ListItem, ListItemText, Badge } from '@mui/material';
 import { Notifications } from '@mui/icons-material';
 import signalApi from '../api/signalApi';
 import tone from '../asset/tones/notification-ns.mp3';
 import moment from 'moment';
+import { AppContext } from '../context/AppContext'; // Import AppContext
 
-const Notification = ({ signalAlert, handleCardClick, setNewSignals , soundEnabled, setSoundEnabled }) => {
+const Notification = ({ handleCardClick }) => {
+    const { signalAlert, setNewSignals, soundEnabled, setSoundEnabled } = useContext(AppContext); // Use context
     const [anchorEl, setAnchorEl] = useState(null);
     const [signals, setSignals] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);

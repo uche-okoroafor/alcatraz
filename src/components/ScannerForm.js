@@ -11,6 +11,20 @@ const SCANNER_TYPE = [
     { label: 'Market Top Gainers', value: 'MarketTopGainers' },
     { label: 'Market Top Losers', value: 'MarketTopLosers' },
     { label: 'Market Highest Volume', value: 'MarketHighestVolume' },
+    { label:  'Pre Market Gainer' , value: 'PreMarketTopGainer' },
+];
+
+// Sample data for dropdowns
+const STRATEGIES = [
+    { label: 'Peak Drop', value: 'PeakDrop' },
+    { label: 'Summit Full', value: 'SummitFull' },
+    { label: 'Tori Trend Line', value: 'ToriTrendLine' },
+    { label: 'Consolidation Breakout', value: 'ConsolidationBreakout' },
+    { label: 'Double 7', value: 'Double7' },
+    { label: 'TrendLineSRSD', value: 'TrendLineSRSD' },
+    { label: 'Stock Scanner Short', value: 'StockScannerShort' },
+    { label:  'RobBook VWap' , value: 'RobBookVWap' },
+    { label: 'VWap RobBook Short'   , value: 'VWapRobBookShort' },
 ];
 const TIMEFRAMES = ['0.5m','1m', '2m', '3m', '4m', '5m', '15m', '30m', '1h', '4h', '1d'];
 
@@ -27,6 +41,8 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
         is_active: true,
         run_demo_trade: false, 
         run_live_trade: false,
+        run_setups: false, // Add new field
+        strategy_setups: [], // Add new field
     });
 
     const [updatedFields, setUpdatedFields] = useState({});
@@ -43,6 +59,8 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
         is_active: true,
         run_demo_trade: false, 
         run_live_trade: false,
+        run_setups: false, // Add new field
+        strategy_setups: [], // Add new field
     };
 
     const [loading, setLoading] = useState(false);
@@ -65,6 +83,8 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
                 is_active: initialSetup.is_active,
                 run_demo_trade: initialSetup.run_demo_trade,
                 run_live_trade: initialSetup.run_live_trade,
+                run_setups: initialSetup.run_setups,
+                strategy_setups: initialSetup.strategy_setups,
             });
         }
     }, [initialSetup]);
@@ -123,6 +143,11 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
     const handleChange = (e, value) => {
         const { name, type, checked } = e.target;
         let newValue = type === 'checkbox' ? checked : value || e.target.value;
+
+        // Handle multi-select for strategy_setups
+        if (name === 'strategy_setups') {
+            newValue = typeof value === 'string' ? value.split(',') : value;
+        }
 
         if (name === 'run_live_trade' && checked) {
             setPasswordDialogOpen(true);
@@ -392,6 +417,47 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                select
+                                label="Strategy Setups"
+                                name="strategy_setups"
+                                value={newScanner.strategy_setups}
+                                onChange={(e) => handleChange(e, e.target.value)}
+                                SelectProps={{
+                                    multiple: true,
+                                }}
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                InputProps={{
+                                    style: { color: 'white' },
+                                    classes: {
+                                        notchedOutline: 'white-border',
+                                    },
+                                }}
+                                placeholder="Select strategy setups"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                    '& .MuiInputBase-input::placeholder': {
+                                        color: 'white',
+                                    },
+                                }}
+                            >
+                                {STRATEGIES.map(strategy => (
+                                    <MenuItem key={strategy.value} value={strategy.value}>{strategy.label}</MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -472,6 +538,27 @@ const AddScannerDialog = ({ onClose, open, initialSetup, onUpdate, setFocusedSet
                                     />
                                 }
                                 label="Run Live Trade"
+                                sx={{ color: 'white' }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        name="run_setups"
+                                        checked={newScanner.run_setups}
+                                        onChange={(e) => handleChange(e)}
+                                        sx={{
+                                            '& .MuiSwitch-switchBase.Mui-checked': {
+                                                color: 'white',
+                                            },
+                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                backgroundColor: 'white',
+                                            },
+                                        }}
+                                    />
+                                }
+                                label="Run Setups"
                                 sx={{ color: 'white' }}
                             />
                         </Grid>

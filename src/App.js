@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom'; // Import Router components and useNavigate
+import { AppProvider, AppContext } from './context/AppContext'; // Import AppProvider and AppContext
 import { Button, Typography } from '@mui/material';
 import { Add, SwitchAccountOutlined } from '@mui/icons-material'; // Import SwitchAccountOutlined icon
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,36 +11,44 @@ import ScannerForm from './components/ScannerForm';
 import logos from './asset/images/logo.png';
 import './App.css'; // Import the CSS file
 import SelectedSetupDetails from './components/StrategySetupDetails';
-import io from "socket.io-client";
+import ScannerDetails from './components/ScannerDetails';
 import axios from 'axios'; // Import axios for making HTTP requests
-import { SERVER_URL, SOCKET_IO_URL } from './endpoints';
+import { SERVER_URL } from './endpoints';
 import Notification from './components/Notification'; // Import the new component
+import { socket } from './connection/socketIo';
+import Chart from './components/Chart'; // Import the Chart component
+import NavBar from './components/NavBar'; // Import NavBar
 
-const socket = io(SOCKET_IO_URL, {
-  transports: ['websocket', 'polling'],
-  withCredentials: true,
-});
 
-export default function TradingDashboard() {
+export default function App() {
+  return (
+    <AppProvider>
+      <TradingDashboard />
+    </AppProvider>
+  );
+}
+
+function TradingDashboard() {
+  const navigate = useNavigate(); // Initialize navigate
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentView, setCurrentView] = useState('list'); // 'list' or 'details'
   const [selectedSetup, setSelectedSetup] = useState(null);
   const [runningStrategy, setRunningStrategy] = useState([]);
+  const [runningScanner, setRunningScanner] = useState([]);
   const [activeRunningStrategy, setActiveRunningStrategy] = useState({ errors: {} });
+  const [activeRunningScanner, setActiveRunningScanner] = useState({ errors: {} });
   const [newAddedSetup, setNewAddedSetup] = useState(false);
   const [newSignals, setNewSignals] = useState([]);
   const [serverError, setServerError] = useState(false);
   const [marketDownTime, setMarketDownTime] = useState(false);
-  const [signalAlert, setSignalAlert] = useState([]); // State for unread signals
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [isStrategies, setIsStrategies] = useState(true);
+
+  const { isStrategies, setIsStrategies, signalAlert, setSignalAlert, soundEnabled, setSoundEnabled } = useContext(AppContext); // Use context
 
   useEffect(() => {
     // Listen for new signals
     socket.on("running-strategy", (runningStrategyObj) => {
-      console.log('running-strategy')
       setRunningStrategy((prevRunningStrategy) => {
         const tempArr = [...prevRunningStrategy, runningStrategyObj._id];
         return tempArr;
@@ -61,6 +71,32 @@ export default function TradingDashboard() {
   }, []);
 
   useEffect(() => {
+    // Listen for scanners
+    socket.on("scanner-result", (runningScannerObj) => {
+      const scannerId = runningScannerObj._id;
+      setRunningScanner((prevRunningScanner) => {
+
+        const tempArr = [...prevRunningScanner, scannerId];
+        return tempArr;
+      });
+
+      handleUpdateActiveRunningScanner(runningScannerObj);
+
+      setTimeout(() => {
+        setRunningScanner((prevRunningScanner) => {
+          return prevRunningScanner.filter((id) => id !== scannerId);
+        });
+      }, 5000);
+    });
+
+    // Clean up the effect on unmount
+    return () => {
+      socket.off("scanner-result");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     // Listen for new signals
     socket.on("error-alert", (errorData) => {
       console.log(errorData, 'error-alert')
@@ -75,20 +111,6 @@ export default function TradingDashboard() {
       socket.off("error-alert");
     };
   });
-
-  useEffect(() => {
-    // Listen for new signals
-    socket.on("signal-alert", (data) => {
-      console.log('signal-alert', data)
-      setSignalAlert(data); // Add to unread signals
-    });
-
-    // Clean up the effect
-    return () => {
-      socket.off("signal-alert");
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     // Listen for new signals
@@ -149,6 +171,20 @@ export default function TradingDashboard() {
     setActiveRunningStrategy(tempObj);
   };
 
+  const handleUpdateActiveRunningScanner = (runningScannerObj) => {
+    const tempObj = activeRunningScanner;
+
+    tempObj[runningScannerObj._id] = {
+      _id: runningScannerObj._id,
+      time_interval: runningScannerObj.time_interval,
+      last_active: new Date(),
+      isRunning: true,
+      failedRunCount: 0
+    };
+
+    setActiveRunningScanner(tempObj);
+  };
+
   const hasError = () => {
     if (Object.keys(activeRunningStrategy.errors).length > 0 || serverError) {
       return 'blinking-dot-danger';
@@ -159,117 +195,124 @@ export default function TradingDashboard() {
   };
 
   return (
-    <div className="container py-3">
-      {currentView === 'list' ? (
-        <>
-          <div className='patch1'></div>
-          <div className="sticky-header">
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
-              <img src={logos} className='mr-3' alt="Trading Strategies" style={{ width: '50px', height: 'auto', borderRadius: '50%', marginRight: '10px' }} />
-              <Typography variant="h6" component="h6" style={{ color: 'white' }}>
-                Alcatraz
-              </Typography>
-              <div className={hasError()}></div>
-            </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="container py-3">
+            {currentView === 'list' ? (
+              <>
+                <NavBar
+                  logos={logos}
+                  hasError={hasError}
+                  signalAlert={signalAlert}
+                  handleCardClick={handleCardClick}
+                  setNewSignals={setNewSignals}
+                  soundEnabled={soundEnabled}
+                  setSoundEnabled={setSoundEnabled}
+                  setIsStrategies={setIsStrategies}
+                  isStrategies={isStrategies}
+                  setOpen={setOpen}
+                  navigate={navigate}
+                />
+                {loading && (
+                  <div className="d-flex justify-content-center align-items-center"
+                    style={{
+                      position: 'fixed',
+                      top: '40%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 9999,
+                    }}
+                  >
+                    <div className="spinner-border" role="status"
+                      style={{
+                        width: '100px',
+                        height: '100px',
+                        color: '#2fa8f6'
+                      }}
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                )}
 
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+                {isStrategies ? <StrategySetupCards
+                  handleCardClick={handleCardClick}
+                  setLoading={setLoading}
+                  runningStrategy={runningStrategy}
+                  newAddedSetup={newAddedSetup}
+                  activeRunningStrategy={activeRunningStrategy}
+                  setActiveRunningStrategy={setActiveRunningStrategy}
+                  newSignals={newSignals}
+                /> :
+                  <ScannerCards
+                    handleCardClick={handleCardClick}
+                    setLoading={setLoading}
+                    runningScanner={runningScanner}
+                    newAddedSetup={newAddedSetup}
+                    activeRunningScanner={activeRunningScanner}
+                    setActiveRunningScanner={setActiveRunningScanner}
+                  />}
 
-              <Notification
-                signalAlert={signalAlert}
-                handleCardClick={handleCardClick}
-                setNewSignals={setNewSignals}
-                soundEnabled={soundEnabled}
-                setSoundEnabled={setSoundEnabled}
-              />
-
-              <Button
-                variant="outlined"
-                sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
-                startIcon={<SwitchAccountOutlined />} // Add SwitchAccountOutlined icon
-                onClick={() => setIsStrategies(!isStrategies)}
-              >
-                {isStrategies ? 'Strategies' : 'Scanner'}
-              </Button>
-              <Button
-                variant="outlined"
-                sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
-                startIcon={<Add />}
-                onClick={() => setOpen(true)}
-              >
-                {isStrategies ? 'Add Setup' : 'Add Scanner'}
-              </Button>
-            </div>
-          </div>
-
-          {loading && (
-            <div className="d-flex justify-content-center align-items-center"
-              style={{
-                position: 'fixed',
-                top: '40%',
-                left: 0,
-                right: 0,
-                zIndex: 9999,
-              }}
-            >
-              <div className="spinner-border" role="status"
-                style={{
-                  width: '100px',
-                  height: '100px',
-                  color: '#2fa8f6'
-                }}
-              >
-                <span className="visually-hidden">Loading...</span>
+                {isStrategies ? <StrategySetupForm
+                  open={open}
+                  onClose={() => setOpen(false)}
+                  setOpen={setOpen}
+                  onUpdate={setNewAddedSetup}
+                /> : <ScannerForm
+                  open={open}
+                  onClose={() => setOpen(false)}
+                  setOpen={setOpen}
+                  onUpdate={setNewAddedSetup}
+                />}
+              </>
+            ) : (
+              <div>
+                <Button
+                  variant="outlined"
+                  sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
+                  onClick={handleBackClick}
+                  className="mb-4"
+                >Back to Setup</Button>
+                {isStrategies ?
+                  <SelectedSetupDetails
+                    selectedSetup={selectedSetup}
+                    onUpdate={setNewAddedSetup}
+                    runningStrategy={runningStrategy}
+                    activeRunningStrategy={activeRunningStrategy}
+                  /> :
+                  <ScannerDetails
+                    selectedSetup={selectedSetup}
+                    onUpdate={setNewAddedSetup}
+                    runningScanner={runningScanner}
+                    activeRunningScanner={activeRunningScanner}
+                  />
+                }
               </div>
-            </div>
-          )}
-
-          {isStrategies ? <StrategySetupCards
-            handleCardClick={handleCardClick}
-            setLoading={setLoading}
-            runningStrategy={runningStrategy}
-            newAddedSetup={newAddedSetup}
-            activeRunningStrategy={activeRunningStrategy}
-            setActiveRunningStrategy={setActiveRunningStrategy}
-            newSignals={newSignals}
-          /> :
-            <ScannerCards
-              handleCardClick={handleCardClick}
-              setLoading={setLoading}
-              runningStrategy={runningStrategy}
-              newAddedSetup={newAddedSetup}
-              activeRunningStrategy={activeRunningStrategy}
-              setActiveRunningStrategy={setActiveRunningStrategy}
-              newSignals={newSignals}
-            />}
-
-          {isStrategies ? <StrategySetupForm
-            open={open}
-            onClose={() => setOpen(false)}
-            setOpen={setOpen}
-            onUpdate={setNewAddedSetup}
-          /> : <ScannerForm
-            open={open}
-            onClose={() => setOpen(false)}
-            setOpen={setOpen}
-            onUpdate={setNewAddedSetup}
-          />}
-        </>
-      ) : (
-        <div>
-          <Button
-            variant="outlined"
-            sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
-            onClick={handleBackClick}
-            className="mb-4"
-          >Back to Setup</Button>
-          <SelectedSetupDetails
-            selectedSetup={selectedSetup}
-            onUpdate={setNewAddedSetup}
-            runningStrategy={runningStrategy}
-            activeRunningStrategy={activeRunningStrategy}
-          />
-        </div>
-      )}
-    </div>
+            )}
+          </div>
+        }
+      />
+      <Route path="/chart" element={<Chart setChartOpen={() => { }} focusedSetup={null} signals={[]} />} />
+      <Route path="/setups" element={<StrategySetupCards
+        handleCardClick={handleCardClick}
+        setLoading={setLoading}
+        runningStrategy={runningStrategy}
+        newAddedSetup={newAddedSetup}
+        activeRunningStrategy={activeRunningStrategy}
+        setActiveRunningStrategy={setActiveRunningStrategy}
+        newSignals={newSignals}
+      />} />
+      <Route path="/scanners" element={<ScannerCards
+        handleCardClick={handleCardClick}
+        setLoading={setLoading}
+        runningScanner={runningScanner}
+        newAddedSetup={newAddedSetup}
+        activeRunningScanner={activeRunningScanner}
+        setActiveRunningScanner={setActiveRunningScanner}
+        newSignals={newSignals}
+      />} />
+    </Routes>
   );
 }

@@ -35,12 +35,12 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
     useEffect(() => {
         async function fetchPriceData() {
             const interval = selectedSetup?.time_interval.replace('m', 'min');
-            // const symbol = selectedSetup?.target_asset;
+            // const symbol = selectedSetup?.symbol;
             // const { data } = await marketPriceApi.fetchMarketPrice(symbol, interval);
             // setPriceData(data);
         }
 
-        if (selectedSetup?.target_asset) {
+        if (selectedSetup?.symbol) {
             fetchPriceData();
         }
     }, [selectedSetup]);
@@ -99,7 +99,7 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                         <strong>Strategy:</strong> {focusedSetup?.strategy_type}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Asset</strong> {focusedSetup?.target_asset}
+                        <strong>Symbol</strong> {focusedSetup?.symbol}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         <strong>Current Price</strong> {focusedSetup?.current_price}
@@ -162,7 +162,7 @@ const SelectedSetupDetails = ({ selectedSetup, onUpdate, runningStrategy, active
                 onUpdate={onUpdate}
             />
 
-            {chartOpen && focusedSetup?.price_data?.length > 0 && <Chart
+            {chartOpen && <Chart
                 focusedSetup={focusedSetup}
                 priceData={priceData}
                 signals={signals}
