@@ -128,7 +128,7 @@ const ScannerCards = (props) => {
                                         <Typography><strong>Last Run:</strong> {moment(scanner.last_active).fromNow()}</Typography>
                                         <Typography><strong>Time Interval:</strong> {scanner.time_interval}</Typography>
                                     </div>
-                                    {newSignals.includes(scanner._id) && <NotificationsIcon className='bell mt-4' />}
+                                    {/* {newSignals.includes(scanner._id) && <NotificationsIcon className='bell mt-4' />} */}
                                 </div>
 
                                 {runningScanner.includes(scanner._id) && (
