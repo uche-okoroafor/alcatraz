@@ -7,7 +7,7 @@ import { socket } from '../connection/socketIo';
 import moment from 'moment';
 
 const StrategySetupCards = (props) => {
-    const { setLoading, handleCardClick, runningStrategy, newAddedSetup, activeRunningStrategy, setActiveRunningStrategy, newSignals } = props;
+    const { setLoading, handleCardClick, runningStrategy, newAddedSetup, activeRunningStrategy, setActiveRunningStrategy, newSignals, filterCriteria } = props;
     const [setups, setSetups] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalSetups, setTotalSetups] = useState(0);
@@ -105,14 +105,27 @@ const StrategySetupCards = (props) => {
         return false;
     }
 
+    const filteredSetups = setups.filter(setup => {
+        if (filterCriteria.strategyType && setup.strategy_type !== filterCriteria.strategyType) {
+            return false;
+        }
+        if (filterCriteria.symbol && setup.symbol !== filterCriteria.symbol) {
+            return false;
+        }
+        if (filterCriteria.strategyName && !setup.name.toLowerCase().includes(filterCriteria.strategyName.toLowerCase())) {
+            return false;
+        }
+        return true;
+    });
+
     return (
         <>
             <div className="row mt-4 card-custom" style={{ minHeight: '50vh' }}>
-                {setups.map((setup, index) => (
+                {filteredSetups.map((setup, index) => (
                     <div
                         className="col-12 col-md-6 col-lg-4 mb-4"
                         key={setup._id}
-                        ref={index === setups.length - 1 ? lastSetupElementRef : null}
+                        ref={index === filteredSetups.length - 1 ? lastSetupElementRef : null}
                     >
                         <Card className="strategy-card" onClick={() => handleCardClick(setup)}>
                             <CardHeader
@@ -130,6 +143,8 @@ const StrategySetupCards = (props) => {
                                         <Typography><strong>Strategy:</strong> {setup.strategy_type}</Typography>
                                         <Typography><strong>Symbol:</strong> {setup.symbol}</Typography>
                                         <Typography><strong>Time Interval:</strong> {setup.time_interval}</Typography>
+                                        {/* <Typography><strong>Last Active:</strong> {' '} 
+                                        {moment(setup?.last_active).format('MMMM Do YYYY, h:mm:ss A')}</Typography> */}
                                         {/* <Typography><strong>Last Active:</strong> {' '} 
                                         {moment(setup?.last_active).format('MMMM Do YYYY, h:mm:ss A')}</Typography> */}
                                     </div>

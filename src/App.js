@@ -18,6 +18,7 @@ import Notification from './components/Notification'; // Import the new componen
 import { socket } from './connection/socketIo';
 import Chart from './components/Chart'; // Import the Chart component
 import NavBar from './components/NavBar'; // Import NavBar
+import FilterPopup from './components/FilterPopup'; // Import the new FilterPopup component
 
 
 export default function App() {
@@ -43,6 +44,8 @@ function TradingDashboard() {
   const [newSignals, setNewSignals] = useState([]);
   const [serverError, setServerError] = useState(false);
   const [marketDownTime, setMarketDownTime] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false); // State for filter popup
+  const [filterCriteria, setFilterCriteria] = useState({}); // State for filter criteria
 
   const { isStrategies, setIsStrategies, signalAlert, setSignalAlert, soundEnabled, setSoundEnabled } = useContext(AppContext); // Use context
 
@@ -194,6 +197,11 @@ function TradingDashboard() {
     return 'static-dot-active';
   };
 
+  const handleFilterApply = (criteria) => {
+    setFilterCriteria(criteria);
+    setFilterOpen(false);
+  };
+
   return (
     <Routes>
       <Route
@@ -214,6 +222,7 @@ function TradingDashboard() {
                   isStrategies={isStrategies}
                   setOpen={setOpen}
                   navigate={navigate}
+                  setFilterOpen={setFilterOpen}
                 />
                 {loading && (
                   <div className="d-flex justify-content-center align-items-center"
@@ -245,6 +254,7 @@ function TradingDashboard() {
                   activeRunningStrategy={activeRunningStrategy}
                   setActiveRunningStrategy={setActiveRunningStrategy}
                   newSignals={newSignals}
+                  filterCriteria={filterCriteria} // Pass filter criteria to StrategySetupCards
                 /> :
                   <ScannerCards
                     handleCardClick={handleCardClick}
@@ -291,6 +301,11 @@ function TradingDashboard() {
                 }
               </div>
             )}
+            <FilterPopup
+              open={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={handleFilterApply}
+            />
           </div>
         }
       />

@@ -15,6 +15,7 @@ const NavBar = ({
   isStrategies,
   setOpen,
   navigate,
+  setFilterOpen
 }) => {
   return (
     <div className="sticky-header">
@@ -57,6 +58,13 @@ const NavBar = ({
           onClick={() => navigate('/chart')}
         >
           Go to Chart
+        </Button>
+        <Button
+          variant="outlined"
+          sx={{ marginLeft: '20px', borderColor: '#2fa8f6', color: '#2fa8f6' }}
+          onClick={() => setFilterOpen(true)}
+        >
+          Filter
         </Button>
       </div>
     </div>
