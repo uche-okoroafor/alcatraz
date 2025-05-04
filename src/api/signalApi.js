@@ -40,9 +40,18 @@ const signalApi = {
     }
   },
 
-  fetchSignals: async (setupId, page, limit) => {
+  fetchSignals: async (setupId, page, limit = 10) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/signals?filters=setup_id^:${setupId}&page=${page}&limit=${limit}&sort=is_read^:asc^,created_at^:desc`);
+      const response = await axios.get(`${API_BASE_URL}/signals?filters=setup_id^:${setupId}&page=${page}&limit=${limit}&sort=is_read^:asc^,updated_at^:desc`);
+      return response.data;
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+    }
+  },
+
+  terminatePosition: async (signalId) => {
+    try {
+      const response = await axios.patch(`${API_BASE_URL}/signals/${signalId}?terminatePosition=true`);
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);

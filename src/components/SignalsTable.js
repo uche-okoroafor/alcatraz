@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { CheckCircle, Error, HourglassEmpty, Delete } from '@mui/icons-material';
+import { CheckCircle, Error, HourglassEmpty, Delete, Cancel } from '@mui/icons-material';
 import signalApi from '../api/signalApi';
 import moment from 'moment';
 
@@ -11,13 +11,15 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
   const [totalSignals, setTotalSignals] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [signalToDelete, setSignalToDelete] = useState(null);
-  const pageSize = 9;
+  const [terminateDialogOpen, setTerminateDialogOpen] = useState(false);
+  const [signalToTerminate, setSignalToTerminate] = useState(null);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     const fetchSignals = async (page) => {
       setLoading(true);
       try {
-        const data = await signalApi.fetchSignals(selectedSetup._id, page, pageSize);
+        const data = await signalApi.fetchSignals(selectedSetup._id, page, limit);
         setSignals(data.data);
         setAllSignals(data.data);
         setTotalSignals(data.navigation.total);
@@ -50,7 +52,7 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
   }, [signals, currentPage]);
 
   const handleNextPage = () => {
-    if (currentPage * pageSize < totalSignals) {
+    if (currentPage * limit < totalSignals) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -79,6 +81,21 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
     setDeleteDialogOpen(true);
   };
 
+  const handleTerminateClick = (signal) => {
+    setSignalToTerminate(signal);
+    setTerminateDialogOpen(true);
+  };
+
+  const handleTerminateConfirm = async () => {
+    try {
+      await signalApi.terminatePosition(signalToTerminate._id);
+      setTerminateDialogOpen(false);
+      setSignalToTerminate(null);
+    } catch (error) {
+      console.error('Error terminating signal:', error);
+    }
+  };
+
   const handleDeleteConfirm = async () => {
     try {
       await signalApi.delete(signalToDelete._id);
@@ -90,7 +107,7 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
     }
   };
 
-  const totalPages = Math.ceil(totalSignals / pageSize);
+  const totalPages = Math.ceil(totalSignals / limit);
 
   return (
     <>
@@ -104,20 +121,24 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
             <Table >
               <TableHead>
                 <TableRow>
-                  <TableCell>Signal Price</TableCell>
+                  <TableCell>Symbol</TableCell>
+                  <TableCell>Entry Price</TableCell>
                   <TableCell>Take Profit</TableCell>
                   <TableCell>Stop Loss</TableCell>
-                  <TableCell>Signal</TableCell>
+                  <TableCell>Position</TableCell>
+                  <TableCell>Max Profit Exit</TableCell>
                   <TableCell>Profit/Loss</TableCell>
-                  <TableCell>Trade Amount</TableCell> {/* Added new field */}
                   <TableCell>Status</TableCell>
-                  <TableCell>Created At</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Opened At</TableCell>
+                  <TableCell>Closed At</TableCell>
+                  <TableCell>Close </TableCell>
+                  <TableCell>Delete</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody >
                 {signals.map((signal) => (
                   <TableRow key={signal._id}>
+                    <TableCell>{signal.symbol}</TableCell>
                     <TableCell>{signal.signal_price}</TableCell>
                     <TableCell>
                       {typeof signal.take_profit === 'number' ? signal.take_profit.toFixed(2) : 'N/A'}
@@ -127,12 +148,27 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
                     </TableCell>
                     <TableCell>{signal.signal}</TableCell>
                     <TableCell>
-                      {typeof signal?.profit_loss === 'number' ? signal.profit_loss.toFixed(2) : 'N/A'}
+                      {typeof signal?.max_profit_before_exit === 'number' ? signal.max_profit_before_exit.toFixed(2) : 'N/A'}
                     </TableCell>
-                    <TableCell>{signal.trade_amount}</TableCell> {/* Added new field */}
+                    <TableCell>
+                      {typeof signal?.profit_loss === 'number' ? (
+                        <span style={{ color: signal.profit_loss >= 0 ? 'green' : 'red' }}>
+                          {signal.profit_loss.toFixed(2)}
+                        </span>
+                      ) : 'N/A'}
+                    </TableCell>
+                    {/* <TableCell>{signal.trade_amount}</TableCell> */}
                     <TableCell>{getStatusIcon(signal.status)}</TableCell>
                     <TableCell>
                       {moment(signal?.created_at).format('MMMM Do YYYY, h:mm:ss A')}
+                    </TableCell>
+                    <TableCell>
+                      {signal?.closed_at ? moment(signal?.closed_at).format('MMMM Do YYYY, h:mm:ss A') : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {signal?.terminated ? 'Terminated' :
+                        signal.status !== 'pending' ? 'Closed' :
+                          <Button onClick={() => handleTerminateClick(signal)}><Cancel style={{ color: 'red' }} /></Button>}
                     </TableCell>
                     <TableCell>
                       <Button onClick={() => handleDeleteClick(signal)}><Delete style={{ color: 'red' }} /></Button>
@@ -150,7 +186,7 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
               </Typography>
               <Button variant="contained" className='m-3'
                 style={{ backgroundColor: '#3FB923' }}
-                onClick={handleNextPage} disabled={currentPage * pageSize >= totalSignals}>
+                onClick={handleNextPage} disabled={currentPage * limit >= totalSignals}>
                 Next
               </Button>
             </div>
@@ -166,6 +202,17 @@ const SignalsTable = ({ selectedSetup, setAllSignals }) => {
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)} variant="outlined">Cancel</Button>
           <Button onClick={handleDeleteConfirm} variant="contained" color="secondary">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={terminateDialogOpen} onClose={() => setTerminateDialogOpen(false)}>
+        <DialogTitle>Confirm Terminate</DialogTitle>
+        <DialogContent>
+          Are you sure you want to terminate this signal?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTerminateDialogOpen(false)} variant="outlined">Cancel</Button>
+          <Button onClick={handleTerminateConfirm} variant="contained" color="secondary">Terminate</Button>
         </DialogActions>
       </Dialog>
     </>

@@ -12,6 +12,14 @@ const FilterPopup = ({ open, onClose, onApply }) => {
         onApply({ strategyType, symbol, strategyName });
     };
 
+    const handleClear = () => {
+        setStrategyType('');
+        setSymbol('');
+        setStrategyName('');
+    };
+
+    const isFilterApplied = strategyType || symbol || strategyName; // Check if any filter is applied
+
     return (
         <Dialog open={open} onClose={onClose} PaperProps={{ sx: { backgroundColor: '#232323', color: 'white' } }}>
             <DialogTitle sx={{ color: 'white' }}>Filter Strategies</DialogTitle>
@@ -121,6 +129,11 @@ const FilterPopup = ({ open, onClose, onApply }) => {
                 <Button onClick={onClose} variant="outlined" sx={{ borderColor: 'white', color: 'white' }}>
                     Cancel
                 </Button>
+                {isFilterApplied && (
+                    <Button onClick={handleClear} variant="outlined" sx={{ borderColor: 'white', color: 'white' }}>
+                        Clear Filter
+                    </Button>
+                )}
                 <Button onClick={handleApply} variant="contained" sx={{ backgroundColor: '#3FB923', color: 'white' }}>
                     Apply
                 </Button>

@@ -40,11 +40,11 @@ const signalApi = {
     }
   },
 
-  fetchMarketPrice: async (symbol, timeFrame, dateFrom, dateTo, dbData = false) => {
+  fetchMarketPrice: async (symbol, timeFrame, dateFrom, dateTo, dbData = false, page = 1, limit = 10000) => {
 
     const fetchDbData = dbData ? '&fetchDbData=true' : '';
     try {
-      const response = await axios.get(`${API_BASE_URL}/price-data/${symbol}/${timeFrame}?dateFrom=${dateFrom}&dateTo=${dateTo}${fetchDbData}`);
+      const response = await axios.get(`${API_BASE_URL}/price-data/${symbol}/${timeFrame}?dateFrom=${dateFrom}&dateTo=${dateTo}${fetchDbData}&limit=${limit}`);
       return response.data;
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);

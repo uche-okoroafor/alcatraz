@@ -6,6 +6,7 @@ import { calculateMA, convertToRawData } from '../helpers';
 import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
 import { formatISO, subDays } from 'date-fns'; // Import date-fns for date manipulation
 import marketPriceApi from '../api/marketPriceApi'; // Import your market price API
+import { mockMarketPriceData } from './mockData/mockData';
 
 const Chart = ({ setChartOpen, focusedSetup, signals }) => {
   const initialData = focusedSetup;
@@ -18,6 +19,10 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
   const [tooltip, setTooltip] = useState(null);
   const [indicator, setIndicator] = useState('None'); // Default to no indicator
   const [fetchDbData, setFetchDbData] = useState(true);
+  const [limit, setLimit] = useState(10000);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const chartRef = useRef(null);
 
   const signal = signals[0];
 
@@ -28,7 +33,7 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
 
   useEffect(() => {
     if (initialData) {
-      const symbol = initialData.symbol || initialData.symbol || 'XAUUSD';
+      const symbol = signal.symbol || initialData.symbol || initialData.symbol || 'XAUUSD';
       const timeFrame = '1min';
       const defaultFromDate = formatISO(subDays(new Date(), 5), { representation: 'date' });
       const defaultToDate = formatISO(new Date(), { representation: 'date' });
@@ -44,32 +49,37 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
     }
   }, []);
 
-  const fetchData = async (ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate) => {
-
+  const fetchData = async (ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate, currentPage = page) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     ptSymbol = ptSymbol || symbol;
     psTimeFrame = psTimeFrame || timeFrame;
     psDefaultFromDate = psDefaultFromDate || fromDate;
     psDefaultToDate = psDefaultToDate || toDate;
+    
     try {
-
-      const response = await marketPriceApi.fetchMarketPrice(ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate, fetchDbData);
+      const response = await marketPriceApi.fetchMarketPrice(ptSymbol, psTimeFrame, psDefaultFromDate, psDefaultToDate, fetchDbData, currentPage, limit);
       const result = await response.data;
+
 
       // Convert the API data to the required format
       const formattedData = result
-        .map((item, index) => ({
-          time: Math.floor(new Date(item.date).getTime() / 1000) + index, // Add index to ensure unique time
+        .map((item) => ({
+          time: Math.floor(new Date(item.date).getTime() / 1000), 
           open: item.open,
           high: item.high,
           low: item.low,
           close: item.close,
-          volume: item.volume,
+          volume: Number(item.volume) || 0, // Convert to number, default to 0 if invalid
         }))
         .sort((a, b) => a.time - b.time); // Sort by time
 
       setData(formattedData);
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,6 +102,21 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
       grid: {
         vertLines: { color: '#2b2b2b' }, // Darker grid lines
         horzLines: { color: '#2b2b2b' },
+      },
+      crosshair: {
+        mode: 1,
+        vertLine: {
+          width: 1,
+          color: '#758696',
+          style: 0,
+          labelBackgroundColor: '#1e1e1e',
+        },
+        horzLine: {
+          width: 1,
+          color: '#758696',
+          style: 0,
+          labelBackgroundColor: '#1e1e1e',
+        }
       },
       timeScale: {
         timeVisible: true, // Enable time visibility on the x-axis
@@ -230,25 +255,36 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
     }
 
     // Add a tooltip to display candlestick and indicator details
-    const handleCrosshairMove = (event) => {
-      if (!event.time || !event.seriesData) {
+    const handleCrosshairMove = (param) => {
+      if (!param.point) {
         setTooltip(null);
         return;
       }
 
-      const seriesData = event.seriesData.get(candlestickSeries);
-      const indicatorPoint =
-        indicatorSeries && indicatorSeries.data().find((point) => point.time === event.time);
+      const dateStr = param.time ? new Date(param.time * 1000).toLocaleString() : '';
+      
+      // Find the nearest data point based on time
+      const nearestPoint = data.find(point => point.time === param.time) || 
+        data.reduce((nearest, current) => {
+          const currentDiff = Math.abs(current.time - param.time);
+          const nearestDiff = Math.abs(nearest.time - param.time);
+          return currentDiff < nearestDiff ? current : nearest;
+        }, data[0]);
+      
+      if (nearestPoint) {
+        const formatPrice = (price) => {
+          if (!price) return 'N/A';
+          return parseFloat(price).toString();
+        };
 
-      if (seriesData) {
         setTooltip({
-          time: new Date(event.time * 1000).toLocaleString(),
-          open: seriesData.open,
-          high: seriesData.high,
-          low: seriesData.low,
-          close: seriesData.close,
-          volume: seriesData.volume,
-          indicator: indicatorPoint ? indicatorPoint.value : 'N/A',
+          time: dateStr,
+          open: formatPrice(nearestPoint.open),
+          high: formatPrice(nearestPoint.high),
+          low: formatPrice(nearestPoint.low),
+          close: formatPrice(nearestPoint.close),
+          volume: nearestPoint.volume || 0,
+          indicator: param.seriesPrices?.get(indicatorSeries)
         });
       }
     };
@@ -297,6 +333,23 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
           style={{
             margin: '0 10px',
             width: '150px',
+            height: '30px',
+            backgroundColor: '#ffffff',
+            borderRadius: '4px',
+          }}
+          InputProps={{
+            style: { color: '#000', height: '30px' },
+          }}
+        />
+        <TextField
+          type="number"
+          value={limit}
+          onChange={(e) => setLimit(Number(e.target.value))}
+          size="small"
+          placeholder="Limit per page"
+          style={{
+            margin: '0 10px',
+            width: '100px',
             height: '30px',
             backgroundColor: '#ffffff',
             borderRadius: '4px',
@@ -424,14 +477,44 @@ const Chart = ({ setChartOpen, focusedSetup, signals }) => {
         }}
       />
       {tooltip && (
-        <div>
-          <div>Time: {tooltip.time}</div>
-          <div>Open: {tooltip.open}</div>
-          <div>High: {tooltip.high}</div>
-          <div>Low: {tooltip.low}</div>
-          <div>Close: {tooltip.close}</div>
-          <div>Volume: {tooltip.volume}</div>
-          <div>{indicator}: {tooltip.indicator}</div>
+        <div
+          style={{
+            marginTop: '-10px',
+            position: 'absolute',
+            top: '60px',
+            left: '20px', // Changed from right to left
+            backgroundColor: 'rgba(30, 30, 30, 0.9)',
+            color: '#d1d4dc',
+            padding: '10px',
+            borderRadius: '4px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            zIndex: 1000,
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            border: '1px solid #2b2b2b'
+          }}
+        >
+          <div style={{ marginBottom: '4px', color: '#2fa8f6', fontWeight: 'bold' }}>
+            {tooltip.time || 'N/A'}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto auto', gap: '4px 12px' }}>
+            <div style={{ color: '#888' }}>Open:</div>
+            <div>{tooltip.open || 'N/A'}</div>
+            <div style={{ color: '#888' }}>High:</div>
+            <div style={{ color: '#3FB923' }}>{tooltip.high || 'N/A'}</div>
+            <div style={{ color: '#888' }}>Low:</div>
+            <div style={{ color: '#ff4444' }}>{tooltip.low || 'N/A'}</div>
+            <div style={{ color: '#888' }}>Close:</div>
+            <div>{tooltip.close || 'N/A'}</div>
+            <div style={{ color: '#888' }}>Volume:</div>
+            <div>{tooltip.volume ? tooltip.volume.toLocaleString() : 'N/A'}</div>
+            {indicator !== 'None' && (
+              <>
+                <div style={{ color: '#888' }}>{indicator}:</div>
+                <div>{typeof tooltip.indicator === 'number' ? tooltip.indicator.toFixed(2) : 'N/A'}</div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
