@@ -46,6 +46,7 @@ function TradingDashboard() {
   const [marketDownTime, setMarketDownTime] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false); // State for filter popup
   const [filterCriteria, setFilterCriteria] = useState({}); // State for filter criteria
+  const [serverEnvironment, setServerEnvironment] = useState(''); // State for server environment
 
   const { isStrategies, setIsStrategies, signalAlert, setSignalAlert, soundEnabled, setSoundEnabled } = useContext(AppContext); // Use context
 
@@ -135,6 +136,7 @@ function TradingDashboard() {
       try {
         const response = await axios.get(`${SERVER_URL}/health-check`);
         response.status === 200 ? setServerError(false) : setServerError(true);
+        response.data.environment ? setServerEnvironment(response.data.environment) : setServerEnvironment(''); // Set server environment
       } catch (error) {
         console.log(error);
         setServerError(true);
@@ -223,6 +225,7 @@ function TradingDashboard() {
                   setOpen={setOpen}
                   navigate={navigate}
                   setFilterOpen={setFilterOpen}
+                  serverEnvironment={serverEnvironment}
                 />
                 {loading && (
                   <div className="d-flex justify-content-center align-items-center"

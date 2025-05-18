@@ -15,14 +15,15 @@ const NavBar = ({
   isStrategies,
   setOpen,
   navigate,
-  setFilterOpen
+  setFilterOpen,
+  serverEnvironment
 }) => {
   return (
     <div className="sticky-header">
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
         <img src={logos} className="mr-3" alt="Trading Strategies" style={{ width: '50px', height: 'auto', borderRadius: '50%', marginRight: '10px' }} />
         <Typography variant="h6" component="h6" style={{ color: 'white' }}>
-          Alcatraz
+          Alcatraz {serverEnvironment}
         </Typography>
         <div className={hasError()}></div>
       </div>
