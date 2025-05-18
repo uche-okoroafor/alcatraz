@@ -17,7 +17,9 @@ const STRATEGIES = [
     { label: 'Stock Scanner Short', value: 'StockScannerShort' },
     {label: 'Equal Risk Position Sizing', value: 'EqualRiskPositionSizing' },
     {label: 'Rob Book VWap', value: 'RobBookVWap' },
-    {label: 'VWap RobBook Short ', value: 'VWapRobBookShort'}
+    {label: 'VWap RobBook Short ', value: 'VWapRobBookShort'},
+    {label:'RSI-VWAP-Over-Bought', value:'RSIVWAP'},
+    {label:'Highest Volume Day', value:'HighestVolumeDay'},
 ];
 const TIMEFRAMES = ['0.1m','0.2m','0.3m','0.4m','0.5m','1m', '2m', '3m', '4m', '5m', '15m', '30m', '1h', '4h', '1d'];
 
@@ -43,7 +45,7 @@ const AddStrategySetupDialog = ({ onClose, open, initialSetup, onUpdate, setFocu
         name: '',
         strategy_type: '',
         symbol: '', // Renamed from symbol
-        time_interval: '',
+        time_interval: '',     
         dip_percentage: 0,
         is_deleted: false,
         is_active: true,
